@@ -114,7 +114,7 @@ describe('send claim payout to the payout address', function () {
     assert(actualPayout.eq(expectedPayout), 'should have transfered the cover amount');
   });
 
-  it('[A2, status: 0, 4, 8, 14] CA no consensus, MV accept, closed with closeClaim()', async function () {
+  it.only('[A2, status: 0, 4, 8, 14] CA no consensus, MV accept, closed with closeClaim()', async function () {
 
     const { cd, cl, qd, mr, master } = this.contracts;
     const cover = { ...coverTemplate };
@@ -131,6 +131,30 @@ describe('send claim payout to the payout address', function () {
     const [coverId] = await qd.getAllCoversOfUser(coverHolder);
     await cl.submitClaim(coverId, { from: coverHolder });
     const claimId = (await cd.actualClaimLength()).subn(1);
+
+    const abi = [{
+      constant: false,
+      inputs: [{
+        name: 'id',
+        type: 'uint256',
+      }, {
+        name: 'vote',
+        type: 'int8',
+      }],
+      name: 'submitCAVote',
+      outputs: [],
+      payable: false,
+      stateMutability: 'nonpayable',
+      type: 'function',
+    }];
+
+    const contract = new web3.eth.Contract(abi, cl.address, { from: member2 });
+
+    const negativeOne = toBN('-1');
+    const val = contract.methods.submitCAVote('1', negativeOne).encodeABI();
+    console.log({ val });
+
+    await contract.methods.submitCAVote('1', negativeOne);
 
     // create a consensus not reached situation, 66% accept vs 33% deny
     await cl.submitCAVote(claimId, '1', { from: member1 });
