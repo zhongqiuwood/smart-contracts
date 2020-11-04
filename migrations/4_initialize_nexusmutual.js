@@ -105,8 +105,9 @@ module.exports = function (deployer, network, accounts) {
 
     // add mcr and ia details
     const currencies = [toHex('ETH'), toHex('DAI')];
-    await p2.saveIADetails(currencies, [100, 15517], 20190103, true);
+
     await mc.addMCRData(13000, ether('100'), ether('7000'), currencies, [100, 15517], 20190103);
+    await p2.saveIADetails(currencies, [100, 15517], 20190103, true);
 
     await mr.payJoiningFee(owner, { from: owner, value: JOINING_FEE });
     await mr.kycVerdict(owner, true);

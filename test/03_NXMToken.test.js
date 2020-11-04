@@ -100,10 +100,10 @@ contract('NXMToken', function(accounts) {
       await mr.kycVerdict(member1, true);
     });
     it('3.6 should not able to buy tokens if not member', async function() {
-      await assertRevert(P1.buyToken({from: notMember, value: tokenAmount}));
+      await assertRevert(P1.buyTokens('0', {from: notMember, value: tokenAmount}));
     });
     it('3.7 should be able to buy tokens if member', async function() {
-      await P1.buyToken({from: member1, value: tokenAmount});
+      await P1.buyTokens('0', {from: member1, value: tokenAmount});
       (await tk.balanceOf(member1))
         .toString()
         .should.be.not.equal((0).toString());
@@ -450,7 +450,7 @@ contract('NXMToken', function(accounts) {
       });
       it('3.33 reverts', async function() {
         const initialTokenBalance = await tk.balanceOf(member1);
-        await assertRevert(P1.buyToken({from: member1, value: tokenAmount}));
+        await assertRevert(P1.buyTokens('0', {from: member1, value: tokenAmount}));
         (await tk.balanceOf(member1))
           .toString()
           .should.be.equal(initialTokenBalance.toString());

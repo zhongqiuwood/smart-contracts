@@ -539,7 +539,7 @@ contract('Quotation', function([
                 value: fee
               });
               await mr.kycVerdict(coverHolder, true);
-              await P1.buyToken({
+              await P1.buyTokens('0', {
                 from: coverHolder,
                 value: tokenAmount
               });
