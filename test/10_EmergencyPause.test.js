@@ -263,11 +263,15 @@ contract('NXMaster: Emergency Pause', function([
       await tc.lock(CLA, ether(60), validity, {from: member3});
     });
     it('10.4 should be able to buy nxm token', async function() {
-      await P1.buyToken({value: ether(60), from: member1});
+      await P1.buyTokens('0', {value: ether(1), from: member1});
     });
 
     it('10.5 should be able to redeem NXM tokens', async function() {
-      await P1.sellNXMTokens(await mcr.getMaxSellTokens(), {from: member1});
+      const member1Balance = await tk.balanceOf(member1);
+      console.log({
+        member1Balance: member1Balance.toString()
+      });
+      await P1.sellNXMTokens(member1Balance, {from: member1});
     });
     it('10.6 should be able to withdraw membership', async function() {
       await mr.withdrawMembership({from: member4});
@@ -397,7 +401,7 @@ contract('NXMaster: Emergency Pause', function([
       // dont use member1 or member2 as they are already locked
     });
     it('10.18 should not be able to buy nxm token', async function() {
-      await assertRevert(P1.buyToken({value: ether(60), from: member1}));
+      await assertRevert(P1.buyTokens('0', {value: ether(60), from: member1}));
     });
     it('10.19 should not be able to redeem NXM tokens', async function() {
       await assertRevert(P1.sellNXMTokens(ether(1), {from: member1}));
