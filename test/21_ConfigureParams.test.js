@@ -335,9 +335,8 @@ contract('Configure Global Parameters', accounts => {
         await gv.closeProposal(p1.toNumber());
         const c2 = await pc.totalCategories();
         assert.equal(c2 / 1, c1 / 1 + 1, 'category not added');
-        ((await mcr.variableMincap()) / 1e18)
-          .toString()
-          .should.be.equal((0).toString());
+        const variableMincap = (await mcr.variableMincap()) / 1e18;
+        assert.equal(variableMincap.toString(), '0');
         await mcr.addMCRData(
           13001,
           '100000000000000000000',
@@ -349,9 +348,8 @@ contract('Configure Global Parameters', accounts => {
       });
 
       it('Should update Dynamic Mincap Threshold', async function() {
-        ((await mcr.variableMincap()) / 1e18)
-          .toString()
-          .should.be.equal((70).toString());
+        let variableMincap = (await mcr.variableMincap()) / 1e18;
+        assert.equal(variableMincap.toString(), '70');
         await updateParameter(33, 2, 'DMCT', mcr, 'uint', 14003);
 
         await mcr.addMCRData(
@@ -362,9 +360,9 @@ contract('Configure Global Parameters', accounts => {
           [100, 15517],
           20190113
         );
-        ((await mcr.variableMincap()) / 1e18)
-          .toString()
-          .should.be.equal((70).toString());
+
+        variableMincap = (await mcr.variableMincap()) / 1e18;
+        assert.equal(variableMincap.toString(), '70');
 
         await mcr.addMCRData(
           15003,
@@ -374,9 +372,9 @@ contract('Configure Global Parameters', accounts => {
           [100, 15517],
           20190113
         );
-        ((await mcr.variableMincap()) / 1e18)
-          .toString()
-          .should.be.equal((140.7).toString());
+
+        variableMincap = (await mcr.variableMincap()) / 1e18;
+        assert.equal(variableMincap.toString(), '140.7');
       });
 
       // it('Should not update Dynamic Mincap Threshold', async function() {
@@ -394,9 +392,8 @@ contract('Configure Global Parameters', accounts => {
           [100, 15517],
           20190113
         );
-        ((await mcr.variableMincap()) / 1e18)
-          .toString()
-          .should.be.equal((228.53061).toString());
+        const variableMincap = (await mcr.variableMincap()) / 1e18;
+        assert.equal(variableMincap.toString(), '228.53061');
       });
 
       it('Should not update newly added Capital Model Parameters', async function() {
