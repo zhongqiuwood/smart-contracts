@@ -16,7 +16,7 @@
 pragma solidity 0.5.7;
 
 import "./Iupgradable.sol";
-import "./external/openzeppelin-solidity/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 
 contract QuotationData is Iupgradable {
@@ -46,7 +46,7 @@ contract QuotationData is Iupgradable {
     }
 
     address public authQuoteEngine;
-  
+
     mapping(bytes4 => uint) internal currencyCSA;
     mapping(address => uint[]) internal userCover;
     mapping(address => uint[]) public userHoldedCover;
@@ -54,8 +54,8 @@ contract QuotationData is Iupgradable {
     mapping(address => mapping(bytes4 => uint)) internal currencyCSAOfSCAdd;
     mapping(uint => uint8) public coverStatus;
     mapping(uint => uint) public holdedCoverIDStatus;
-    mapping(uint => bool) public timestampRepeated; 
-    
+    mapping(uint => bool) public timestampRepeated;
+
 
     Cover[] internal allCovers;
     HoldCover[] internal allCoverHolded;
@@ -92,7 +92,7 @@ contract QuotationData is Iupgradable {
         allCoverHolded.push(HoldCover(0, address(0), address(0), 0x00, arr, 0));
 
     }
-    
+
     /// @dev Adds the amount in Total Sum Assured of a given currency of a given smart contract address.
     /// @param _add Smart Contract Address.
     /// @param _amount Amount to be added.
@@ -106,7 +106,7 @@ contract QuotationData is Iupgradable {
     function subFromTotalSumAssuredSC(address _add, bytes4 _curr, uint _amount) external onlyInternal {
         currencyCSAOfSCAdd[_add][_curr] = currencyCSAOfSCAdd[_add][_curr].sub(_amount);
     }
-    
+
     /// @dev Subtracts the amount from Total Sum Assured of a given currency.
     /// @param _curr Currency Name.
     /// @param _amount Amount to be subtracted.
@@ -125,7 +125,7 @@ contract QuotationData is Iupgradable {
     function setTimestampRepeated(uint _timestamp) external onlyInternal {
         timestampRepeated[_timestamp] = true;
     }
-    
+
     /// @dev Creates a blank new cover.
     function addCover(
         uint16 _coverPeriod,
@@ -135,13 +135,13 @@ contract QuotationData is Iupgradable {
         address _scAddress,
         uint premium,
         uint premiumNXM
-    )   
-        external
-        onlyInternal
+    )
+    external
+    onlyInternal
     {
         uint expiryDate = now.add(uint(_coverPeriod).mul(1 days));
         allCovers.push(Cover(_userAddress, _currencyCode,
-                _sumAssured, _coverPeriod, expiryDate, _scAddress, premiumNXM));
+            _sumAssured, _coverPeriod, expiryDate, _scAddress, premiumNXM));
         uint cid = allCovers.length.sub(1);
         userCover[_userAddress].push(cid);
         emit CoverDetailsEvent(cid, _scAddress, _sumAssured, expiryDate, premium, premiumNXM, _currencyCode);
@@ -151,19 +151,19 @@ contract QuotationData is Iupgradable {
     function addHoldCover(
         address payable from,
         address scAddress,
-        bytes4 coverCurr, 
+        bytes4 coverCurr,
         uint[] calldata coverDetails,
         uint16 coverPeriod
-    )   
-        external
-        onlyInternal
+    )
+    external
+    onlyInternal
     {
         uint holdedCoverLen = allCoverHolded.length;
-        holdedCoverIDStatus[holdedCoverLen] = uint(HCIDStatus.kycPending);             
-        allCoverHolded.push(HoldCover(holdedCoverLen, from, scAddress, 
+        holdedCoverIDStatus[holdedCoverLen] = uint(HCIDStatus.kycPending);
+        allCoverHolded.push(HoldCover(holdedCoverLen, from, scAddress,
             coverCurr, coverDetails, coverPeriod));
         userHoldedCover[from].push(allCoverHolded.length.sub(1));
-    
+
     }
 
     ///@dev sets refund eligible bit.
@@ -181,7 +181,7 @@ contract QuotationData is Iupgradable {
     }
 
     /**
-     * @dev to set address of kyc authentication 
+     * @dev to set address of kyc authentication
      * @param _add is the new address
      */
     function setKycAuthAddress(address _add) external onlyInternal {
@@ -206,7 +206,7 @@ contract QuotationData is Iupgradable {
             val = stlp;
 
         } else if (code == "STL") {
-            
+
             val = stl;
 
         } else if (code == "PM") {
@@ -222,7 +222,7 @@ contract QuotationData is Iupgradable {
             val = tokensRetained;
 
         }
-        
+
     }
 
     /// @dev Gets Product details.
@@ -231,14 +231,14 @@ contract QuotationData is Iupgradable {
     /// @return  _STL short term Load.
     /// @return  _STLP short term load period.
     function getProductDetails()
-        external
-        view
-        returns (
-            uint _minDays,
-            uint _pm,
-            uint _stl,
-            uint _stlp
-        )
+    external
+    view
+    returns (
+        uint _minDays,
+        uint _pm,
+        uint _stl,
+        uint _stlp
+    )
     {
 
         _minDays = minDays;
@@ -317,31 +317,31 @@ contract QuotationData is Iupgradable {
     /// @dev Provides the details of a cover Id
     /// @param _cid cover Id
     /// @return memberAddress cover user address.
-    /// @return scAddress smart contract Address 
+    /// @return scAddress smart contract Address
     /// @return currencyCode currency of cover
     /// @return sumAssured sum assured of cover
     /// @return premiumNXM premium in NXM
     function getCoverDetailsByCoverID1(
         uint _cid
-    ) 
-        external
-        view
-        returns (
-            uint cid,
-            address _memberAddress,
-            address _scAddress,
-            bytes4 _currencyCode,
-            uint _sumAssured,  
-            uint premiumNXM 
-        ) 
+    )
+    external
+    view
+    returns (
+        uint cid,
+        address _memberAddress,
+        address _scAddress,
+        bytes4 _currencyCode,
+        uint _sumAssured,
+        uint premiumNXM
+    )
     {
         return (
-            _cid,
-            allCovers[_cid].memberAddress,
-            allCovers[_cid].scAddress,
-            allCovers[_cid].currencyCode,
-            allCovers[_cid].sumAssured,
-            allCovers[_cid].premiumNXM
+        _cid,
+        allCovers[_cid].memberAddress,
+        allCovers[_cid].scAddress,
+        allCovers[_cid].currencyCode,
+        allCovers[_cid].sumAssured,
+        allCovers[_cid].premiumNXM
         );
     }
 
@@ -354,23 +354,23 @@ contract QuotationData is Iupgradable {
     function getCoverDetailsByCoverID2(
         uint _cid
     )
-        external
-        view
-        returns (
-            uint cid,
-            uint8 status,
-            uint sumAssured,
-            uint16 coverPeriod,
-            uint validUntil
-        ) 
+    external
+    view
+    returns (
+        uint cid,
+        uint8 status,
+        uint sumAssured,
+        uint16 coverPeriod,
+        uint validUntil
+    )
     {
 
         return (
-            _cid,
-            coverStatus[_cid],
-            allCovers[_cid].sumAssured,
-            allCovers[_cid].coverPeriod,
-            allCovers[_cid].validUntil
+        _cid,
+        coverStatus[_cid],
+        allCovers[_cid].sumAssured,
+        allCovers[_cid].coverPeriod,
+        allCovers[_cid].validUntil
         );
     }
 
@@ -382,20 +382,20 @@ contract QuotationData is Iupgradable {
     function getHoldedCoverDetailsByID1(
         uint _hcid
     )
-        external 
-        view
-        returns (
-            uint hcid,
-            address scAddress,
-            bytes4 coverCurr,
-            uint16 coverPeriod
-        )
+    external
+    view
+    returns (
+        uint hcid,
+        address scAddress,
+        bytes4 coverCurr,
+        uint16 coverPeriod
+    )
     {
         return (
-            _hcid,
-            allCoverHolded[_hcid].scAddress,
-            allCoverHolded[_hcid].coverCurr, 
-            allCoverHolded[_hcid].coverPeriod
+        _hcid,
+        allCoverHolded[_hcid].scAddress,
+        allCoverHolded[_hcid].coverCurr,
+        allCoverHolded[_hcid].coverPeriod
         );
     }
 
@@ -412,22 +412,22 @@ contract QuotationData is Iupgradable {
     /// @dev Provides the details of a holded cover Id
     /// @param _hcid holded cover Id
     /// @return memberAddress holded cover user address.
-    /// @return coverDetails array contains SA, Cover Currency Price,Price in NXM, Expiration time of Qoute.    
+    /// @return coverDetails array contains SA, Cover Currency Price,Price in NXM, Expiration time of Qoute.
     function getHoldedCoverDetailsByID2(
         uint _hcid
-    ) 
-        external
-        view
-        returns (
-            uint hcid,
-            address payable memberAddress, 
-            uint[] memory coverDetails
-        )
+    )
+    external
+    view
+    returns (
+        uint hcid,
+        address payable memberAddress,
+        uint[] memory coverDetails
+    )
     {
         return (
-            _hcid,
-            allCoverHolded[_hcid].userAddress,
-            allCoverHolded[_hcid].coverDetails
+        _hcid,
+        allCoverHolded[_hcid].userAddress,
+        allCoverHolded[_hcid].coverDetails
         );
     }
 
@@ -459,7 +459,7 @@ contract QuotationData is Iupgradable {
             _changeSTLP(val);
 
         } else if (code == "STL") {
-            
+
             _changeSTL(val);
 
         } else if (code == "PM") {
@@ -478,9 +478,9 @@ contract QuotationData is Iupgradable {
 
             revert("Invalid param code");
         }
-        
+
     }
-    
+
     /// @dev Changes the existing Profit Margin value
     function _changePM(uint _pm) internal {
         pm = _pm;
@@ -500,9 +500,9 @@ contract QuotationData is Iupgradable {
     function _changeMinDays(uint _days) internal {
         minDays = _days;
     }
-    
+
     /**
-     * @dev to set the the amount of tokens retained 
+     * @dev to set the the amount of tokens retained
      * @param val is the amount retained
      */
     function _setTokensRetained(uint val) internal {

@@ -16,7 +16,7 @@
 pragma solidity 0.5.7;
 
 import "./Iupgradable.sol";
-import "./external/openzeppelin-solidity/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 
 contract DSValue {
@@ -92,11 +92,11 @@ contract PoolData is Iupgradable {
     uint public a;
     uint public shockParameter;
     uint public c;
-    uint public mcrFailTime; 
+    uint public mcrFailTime;
     uint public ethVolumeLimit;
     uint public capReached;
     uint public capacityLimit;
-    
+
     constructor(address _notariseAdd, address _daiFeedAdd, address _daiAdd) public {
         notariseMCR = _notariseAdd;
         daiFeedAddress = _daiFeedAdd;
@@ -124,13 +124,13 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev to set the maximum cap allowed 
+     * @dev to set the maximum cap allowed
      * @param val is the new value
      */
     function setCapReached(uint val) external onlyInternal {
         capReached = val;
     }
-    
+
     /// @dev Updates the 3 day average rate of a IA currency.
     /// To be replaced by MakerDao's on chain rates
     /// @param curr IA Currency Name.
@@ -154,32 +154,32 @@ contract PoolData is Iupgradable {
         allMCRData.push(McrData(mcrp, mcre, vf, time));
     }
 
-    /** 
+    /**
      * @dev Updates the Timestamp at which result of oracalize call is received.
-     */  
+     */
     function updateDateUpdOfAPI(bytes32 myid) external onlyInternal {
         allAPIid[myid].dateUpd = uint64(now);
     }
 
-    /** 
+    /**
      * @dev Saves the details of the Oraclize API.
      * @param myid Id return by the oraclize query.
      * @param _typeof type of the query for which oraclize call is made.
-     * @param id ID of the proposal,quote,cover etc. for which oraclize call is made 
-     */  
+     * @param id ID of the proposal,quote,cover etc. for which oraclize call is made
+     */
     function saveApiDetails(bytes32 myid, bytes4 _typeof, uint id) external onlyInternal {
         allAPIid[myid] = ApiId(_typeof, "", id, uint64(now), uint64(now));
     }
 
-    /** 
-     * @dev Stores the id return by the oraclize query. 
+    /**
+     * @dev Stores the id return by the oraclize query.
      * Maintains record of all the Ids return by oraclize query.
      * @param myid Id return by the oraclize query.
-     */  
+     */
     function addInAllApiCall(bytes32 myid) external onlyInternal {
         allAPIcall.push(myid);
     }
-    
+
     /**
      * @dev Saves investment asset rank details.
      * @param maxIACurr Maximum ranked investment asset currency.
@@ -187,7 +187,7 @@ contract PoolData is Iupgradable {
      * @param minIACurr Minimum ranked investment asset currency.
      * @param minRate Minimum ranked investment asset rate.
      * @param date in yyyymmdd.
-     */  
+     */
     function saveIARankDetails(
         bytes4 maxIACurr,
         uint64 maxRate,
@@ -195,8 +195,8 @@ contract PoolData is Iupgradable {
         uint64 minRate,
         uint64 date
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         allIARankDetails.push(IARankDetails(maxIACurr, maxRate, minIACurr, minRate));
         datewiseId[date] = allIARankDetails.length.sub(1);
@@ -209,34 +209,34 @@ contract PoolData is Iupgradable {
         lastLiquidityTradeTrigger = now;
     }
 
-    /** 
+    /**
      * @dev Updates Last Date.
-     */  
+     */
     function updatelastDate(uint64 newDate) external onlyInternal {
         lastDate = newDate;
     }
 
     /**
-     * @dev Adds currency asset currency. 
+     * @dev Adds currency asset currency.
      * @param curr currency of the asset
      * @param currAddress address of the currency
-     * @param baseMin base minimum in 10^18. 
-     */  
+     * @param baseMin base minimum in 10^18.
+     */
     function addCurrencyAssetCurrency(
         bytes4 curr,
         address currAddress,
         uint baseMin
-    ) 
-        external
+    )
+    external
     {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allCurrencies.push(curr);
         allCurrencyAssets[curr] = CurrencyAssets(currAddress, baseMin, 0);
     }
-    
+
     /**
-     * @dev Adds investment asset. 
-     */  
+     * @dev Adds investment asset.
+     */
     function addInvestmentAssetCurrency(
         bytes4 curr,
         address currAddress,
@@ -244,8 +244,8 @@ contract PoolData is Iupgradable {
         uint64 minHoldingPercX100,
         uint64 maxHoldingPercX100,
         uint8 decimals
-    ) 
-        external
+    )
+    external
     {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allInvestmentCurrencies.push(curr);
@@ -255,7 +255,7 @@ contract PoolData is Iupgradable {
 
     /**
      * @dev Changes base minimum of a given currency asset.
-     */ 
+     */
     function changeCurrencyAssetBaseMin(bytes4 curr, uint baseMin) external {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allCurrencyAssets[curr].baseMin = baseMin;
@@ -263,20 +263,20 @@ contract PoolData is Iupgradable {
 
     /**
      * @dev changes variable minimum of a given currency asset.
-     */  
+     */
     function changeCurrencyAssetVarMin(bytes4 curr, uint varMin) external onlyInternal {
         allCurrencyAssets[curr].varMin = varMin;
     }
 
-    /** 
+    /**
      * @dev Changes the investment asset status.
-     */ 
+     */
     function changeInvestmentAssetStatus(bytes4 curr, bool status) external {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allInvestmentAssets[curr].status = status;
     }
 
-    /** 
+    /**
      * @dev Changes the investment asset Holding percentage of a given currency.
      */
     function changeInvestmentAssetHoldingPerc(
@@ -284,7 +284,7 @@ contract PoolData is Iupgradable {
         uint64 minPercX100,
         uint64 maxPercX100
     )
-        external
+    external
     {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allInvestmentAssets[curr].minHoldingPercX100 = minPercX100;
@@ -292,8 +292,8 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev Gets Currency asset token address. 
-     */  
+     * @dev Gets Currency asset token address.
+     */
     function changeCurrencyAssetAddress(bytes4 curr, address currAdd) external {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allCurrencyAssets[curr].currAddress = currAdd;
@@ -301,13 +301,13 @@ contract PoolData is Iupgradable {
 
     /**
      * @dev Changes Investment asset token address.
-     */ 
+     */
     function changeInvestmentAssetAddressAndDecimal(
         bytes4 curr,
         address currAdd,
         uint8 newDecimal
     )
-        external
+    external
     {
         require(ms.checkIsAuthToGoverned(msg.sender));
         allInvestmentAssets[curr].currAddress = currAdd;
@@ -380,9 +380,9 @@ contract PoolData is Iupgradable {
             val = a;
 
         }
-            
+
     }
- 
+
     /// @dev Checks whether a given address can notaise MCR data or not.
     /// @param _add Address.
     /// @return res Returns 0 if address is not authorized, else 1.
@@ -398,10 +398,10 @@ contract PoolData is Iupgradable {
     function getLastMCR() external view returns(uint mcrPercx100, uint mcrEtherx1E18, uint vFull, uint64 date) {
         uint index = allMCRData.length.sub(1);
         return (
-            allMCRData[index].mcrPercx100,
-            allMCRData[index].mcrEther,
-            allMCRData[index].vFull,
-            allMCRData[index].date
+        allMCRData[index].mcrPercx100,
+        allMCRData[index].mcrEther,
+        allMCRData[index].vFull,
+        allMCRData[index].date
         );
     }
 
@@ -434,243 +434,243 @@ contract PoolData is Iupgradable {
         _c = c;
         rate = _getAvgRate(curr, false);
     }
-    
+
     /// @dev Gets the total number of times MCR calculation has been made.
     function getMCRDataLength() external view returns(uint len) {
         len = allMCRData.length;
     }
- 
+
     /**
      * @dev Gets investment asset rank details by given date.
-     */  
+     */
     function getIARankDetailsByDate(
         uint64 date
     )
-        external
-        view
-        returns(
-            bytes4 maxIACurr,
-            uint64 maxRate,
-            bytes4 minIACurr,
-            uint64 minRate
-        )
+    external
+    view
+    returns(
+        bytes4 maxIACurr,
+        uint64 maxRate,
+        bytes4 minIACurr,
+        uint64 minRate
+    )
     {
         uint index = datewiseId[date];
         return (
-            allIARankDetails[index].maxIACurr,
-            allIARankDetails[index].maxRate,
-            allIARankDetails[index].minIACurr,
-            allIARankDetails[index].minRate
+        allIARankDetails[index].maxIACurr,
+        allIARankDetails[index].maxRate,
+        allIARankDetails[index].minIACurr,
+        allIARankDetails[index].minRate
         );
     }
 
-    /** 
+    /**
      * @dev Gets Last Date.
-     */ 
+     */
     function getLastDate() external view returns(uint64 date) {
         return lastDate;
     }
 
     /**
      * @dev Gets investment currency for a given index.
-     */  
+     */
     function getInvestmentCurrencyByIndex(uint index) external view returns(bytes4 currName) {
         return allInvestmentCurrencies[index];
     }
 
     /**
      * @dev Gets count of investment currency.
-     */  
+     */
     function getInvestmentCurrencyLen() external view returns(uint len) {
         return allInvestmentCurrencies.length;
     }
 
     /**
      * @dev Gets all the investment currencies.
-     */ 
+     */
     function getAllInvestmentCurrencies() external view returns(bytes4[] memory currencies) {
         return allInvestmentCurrencies;
     }
 
     /**
      * @dev Gets All currency for a given index.
-     */  
+     */
     function getCurrenciesByIndex(uint index) external view returns(bytes4 currName) {
         return allCurrencies[index];
     }
 
-    /** 
+    /**
      * @dev Gets count of All currency.
-     */  
+     */
     function getAllCurrenciesLen() external view returns(uint len) {
         return allCurrencies.length;
     }
 
     /**
-     * @dev Gets all currencies 
-     */  
+     * @dev Gets all currencies
+     */
     function getAllCurrencies() external view returns(bytes4[] memory currencies) {
         return allCurrencies;
     }
 
     /**
      * @dev Gets currency asset details for a given currency.
-     */  
+     */
     function getCurrencyAssetVarBase(
         bytes4 curr
     )
-        external
-        view
-        returns(
-            bytes4 currency,
-            uint baseMin,
-            uint varMin
-        )
+    external
+    view
+    returns(
+        bytes4 currency,
+        uint baseMin,
+        uint varMin
+    )
     {
         return (
-            curr,
-            allCurrencyAssets[curr].baseMin,
-            allCurrencyAssets[curr].varMin
+        curr,
+        allCurrencyAssets[curr].baseMin,
+        allCurrencyAssets[curr].varMin
         );
     }
 
     /**
      * @dev Gets minimum variable value for currency asset.
-     */  
+     */
     function getCurrencyAssetVarMin(bytes4 curr) external view returns(uint varMin) {
         return allCurrencyAssets[curr].varMin;
     }
 
-    /** 
+    /**
      * @dev Gets base minimum of  a given currency asset.
-     */  
+     */
     function getCurrencyAssetBaseMin(bytes4 curr) external view returns(uint baseMin) {
         return allCurrencyAssets[curr].baseMin;
     }
 
-    /** 
+    /**
      * @dev Gets investment asset maximum and minimum holding percentage of a given currency.
-     */  
+     */
     function getInvestmentAssetHoldingPerc(
         bytes4 curr
     )
-        external
-        view
-        returns(
-            uint64 minHoldingPercX100,
-            uint64 maxHoldingPercX100
-        )
+    external
+    view
+    returns(
+        uint64 minHoldingPercX100,
+        uint64 maxHoldingPercX100
+    )
     {
         return (
-            allInvestmentAssets[curr].minHoldingPercX100,
-            allInvestmentAssets[curr].maxHoldingPercX100
+        allInvestmentAssets[curr].minHoldingPercX100,
+        allInvestmentAssets[curr].maxHoldingPercX100
         );
     }
 
-    /** 
+    /**
      * @dev Gets investment asset decimals.
-     */  
+     */
     function getInvestmentAssetDecimals(bytes4 curr) external view returns(uint8 decimal) {
         return allInvestmentAssets[curr].decimals;
     }
 
     /**
      * @dev Gets investment asset maximum holding percentage of a given currency.
-     */  
+     */
     function getInvestmentAssetMaxHoldingPerc(bytes4 curr) external view returns(uint64 maxHoldingPercX100) {
         return allInvestmentAssets[curr].maxHoldingPercX100;
     }
 
     /**
      * @dev Gets investment asset minimum holding percentage of a given currency.
-     */  
+     */
     function getInvestmentAssetMinHoldingPerc(bytes4 curr) external view returns(uint64 minHoldingPercX100) {
         return allInvestmentAssets[curr].minHoldingPercX100;
     }
 
-    /** 
+    /**
      * @dev Gets investment asset details of a given currency
-     */  
+     */
     function getInvestmentAssetDetails(
         bytes4 curr
     )
-        external
-        view
-        returns(
-            bytes4 currency,
-            address currAddress,
-            bool status,
-            uint64 minHoldingPerc,
-            uint64 maxHoldingPerc,
-            uint8 decimals
-        )
+    external
+    view
+    returns(
+        bytes4 currency,
+        address currAddress,
+        bool status,
+        uint64 minHoldingPerc,
+        uint64 maxHoldingPerc,
+        uint8 decimals
+    )
     {
         return (
-            curr,
-            allInvestmentAssets[curr].currAddress,
-            allInvestmentAssets[curr].status,
-            allInvestmentAssets[curr].minHoldingPercX100,
-            allInvestmentAssets[curr].maxHoldingPercX100,
-            allInvestmentAssets[curr].decimals
+        curr,
+        allInvestmentAssets[curr].currAddress,
+        allInvestmentAssets[curr].status,
+        allInvestmentAssets[curr].minHoldingPercX100,
+        allInvestmentAssets[curr].maxHoldingPercX100,
+        allInvestmentAssets[curr].decimals
         );
     }
 
     /**
      * @dev Gets Currency asset token address.
-     */  
+     */
     function getCurrencyAssetAddress(bytes4 curr) external view returns(address) {
         return allCurrencyAssets[curr].currAddress;
     }
 
     /**
      * @dev Gets investment asset token address.
-     */  
+     */
     function getInvestmentAssetAddress(bytes4 curr) external view returns(address) {
         return allInvestmentAssets[curr].currAddress;
     }
 
     /**
      * @dev Gets investment asset active Status of a given currency.
-     */  
+     */
     function getInvestmentAssetStatus(bytes4 curr) external view returns(bool status) {
         return allInvestmentAssets[curr].status;
     }
 
-    /** 
+    /**
      * @dev Gets type of oraclize query for a given Oraclize Query ID.
      * @param myid Oraclize Query ID identifying the query for which the result is being received.
      * @return _typeof It could be of type "quote","quotation","cover","claim" etc.
-     */  
+     */
     function getApiIdTypeOf(bytes32 myid) external view returns(bytes4) {
         return allAPIid[myid].typeOf;
     }
 
-    /** 
+    /**
      * @dev Gets ID associated to oraclize query for a given Oraclize Query ID.
      * @param myid Oraclize Query ID identifying the query for which the result is being received.
      * @return id1 It could be the ID of "proposal","quotation","cover","claim" etc.
-     */  
+     */
     function getIdOfApiId(bytes32 myid) external view returns(uint) {
         return allAPIid[myid].id;
     }
 
-    /** 
+    /**
      * @dev Gets the Timestamp of a oracalize call.
-     */  
+     */
     function getDateAddOfAPI(bytes32 myid) external view returns(uint64) {
         return allAPIid[myid].dateAdd;
     }
 
     /**
      * @dev Gets the Timestamp at which result of oracalize call is received.
-     */  
+     */
     function getDateUpdOfAPI(bytes32 myid) external view returns(uint64) {
         return allAPIid[myid].dateUpd;
     }
 
-    /** 
-     * @dev Gets currency by oracalize id. 
-     */  
+    /**
+     * @dev Gets currency by oracalize id.
+     */
     function getCurrOfApiId(bytes32 myid) external view returns(bytes4) {
         return allAPIid[myid].currency;
     }
@@ -679,43 +679,43 @@ contract PoolData is Iupgradable {
      * @dev Gets ID return by the oraclize query of a given index.
      * @param index Index.
      * @return myid ID return by the oraclize query.
-     */  
+     */
     function getApiCallIndex(uint index) external view returns(bytes32 myid) {
         myid = allAPIcall[index];
     }
 
     /**
-     * @dev Gets Length of API call. 
-     */  
+     * @dev Gets Length of API call.
+     */
     function getApilCallLength() external view returns(uint) {
         return allAPIcall.length;
     }
-    
+
     /**
      * @dev Get Details of Oraclize API when given Oraclize Id.
      * @param myid ID return by the oraclize query.
-     * @return _typeof ype of the query for which oraclize 
-     * call is made.("proposal","quote","quotation" etc.) 
-     */  
+     * @return _typeof ype of the query for which oraclize
+     * call is made.("proposal","quote","quotation" etc.)
+     */
     function getApiCallDetails(
         bytes32 myid
     )
-        external
-        view
-        returns(
-            bytes4 _typeof,
-            bytes4 curr,
-            uint id,
-            uint64 dateAdd,
-            uint64 dateUpd
-        )
+    external
+    view
+    returns(
+        bytes4 _typeof,
+        bytes4 curr,
+        uint id,
+        uint64 dateAdd,
+        uint64 dateUpd
+    )
     {
         return (
-            allAPIid[myid].typeOf,
-            allAPIid[myid].currency,
-            allAPIid[myid].id,
-            allAPIid[myid].dateAdd,
-            allAPIid[myid].dateUpd
+        allAPIid[myid].typeOf,
+        allAPIid[myid].currency,
+        allAPIid[myid].id,
+        allAPIid[myid].dateAdd,
+        allAPIid[myid].dateUpd
         );
     }
 
@@ -775,11 +775,11 @@ contract PoolData is Iupgradable {
         } else {
             revert("Invalid param code");
         }
-            
+
     }
 
     /**
-     * @dev to get the average rate of currency rate 
+     * @dev to get the average rate of currency rate
      * @param curr is the currency in concern
      * @return required rate
      */
@@ -788,7 +788,7 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev to get the average rate of investment rate 
+     * @dev to get the average rate of investment rate
      * @param curr is the investment in concern
      * @return required rate
      */
@@ -813,7 +813,7 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev to set the ethereum volume limit 
+     * @dev to set the ethereum volume limit
      * @param val is the new limit value
      */
     function _setEthVolumeLimit(uint val) internal {
@@ -829,7 +829,7 @@ contract PoolData is Iupgradable {
     function _changeShockParameter(uint newParam) internal {
         shockParameter = newParam;
     }
-    
+
     /// @dev Changes time period for obtaining new MCR data from external oracle query.
     function _changeMCRTime(uint _time) internal {
         mcrTime = _time;
@@ -841,7 +841,7 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev to change the uniswap deadline time 
+     * @dev to change the uniswap deadline time
      * @param newDeadline is the value
      */
     function _changeUniswapDeadlineTime(uint newDeadline) internal {
@@ -849,7 +849,7 @@ contract PoolData is Iupgradable {
     }
 
     /**
-     * @dev to change the liquidity trade call back time 
+     * @dev to change the liquidity trade call back time
      * @param newTime is the new value to be set
      */
     function _changeliquidityTradeCallbackTime(uint newTime) internal {
@@ -858,14 +858,14 @@ contract PoolData is Iupgradable {
 
     /**
      * @dev Changes time after which investment asset rates need to be fed.
-     */  
+     */
     function _changeIARatesTime(uint _newTime) internal {
         iaRatesTime = _newTime;
     }
-    
+
     /**
      * @dev Changes the variation range percentage.
-     */  
+     */
     function _changeVariationPercX100(uint newPercX100) internal {
         variationPercX100 = newPercX100;
     }
@@ -879,12 +879,12 @@ contract PoolData is Iupgradable {
     function _changeA(uint val) internal {
         a = val;
     }
-    
+
     /**
-     * @dev to change the capacity limit 
+     * @dev to change the capacity limit
      * @param val is the new value
      */
     function _changeCapacityLimit(uint val) internal {
         capacityLimit = val;
-    }    
+    }
 }

@@ -28,7 +28,7 @@ contract INXMMaster {
     function delegateCallBack(bytes32 myid) external;
 
     function masterInitialized() public view returns(bool);
-    
+
     function isInternal(address _add) public view returns(bool);
 
     function isPause() public view returns(bool check);
@@ -36,7 +36,7 @@ contract INXMMaster {
     function isOwner(address _add) public view returns(bool);
 
     function isMember(address _add) public view returns(bool);
-    
+
     function checkIsAuthToGoverned(address _add) public view returns(bool);
 
     function updatePauseTime(uint _time) public;

@@ -12,11 +12,11 @@
 
   You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/ */
-    
+
 pragma solidity 0.5.7;
 
 import "./Iupgradable.sol";
-import "./external/openzeppelin-solidity/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 
 contract TokenData is Iupgradable {
@@ -63,8 +63,8 @@ contract TokenData is Iupgradable {
      * @dev mapping of uw address to array of sc address to fetch 
      * all staked contract address of underwriter, pushing
      * data into this array of Stake returns stakerIndex 
-     */ 
-    mapping(address => Stake[]) public stakerStakedContracts; 
+     */
+    mapping(address => Stake[]) public stakerStakedContracts;
 
     /** 
      * @dev mapping of sc address to array of UW address to fetch
@@ -76,7 +76,7 @@ contract TokenData is Iupgradable {
     /**
      * @dev mapping of staked contract Address to the array of StakeCommission
      * here index of this array is stakedContractIndex
-     */ 
+     */
     mapping(address => mapping(uint => StakeCommission)) public stakedContractStakeCommission;
 
     mapping(address => uint) public lastCompletedStakeCommission;
@@ -84,18 +84,18 @@ contract TokenData is Iupgradable {
     /** 
      * @dev mapping of the staked contract address to the current 
      * staker index who will receive commission.
-     */ 
+     */
     mapping(address => uint) public stakedContractCurrentCommissionIndex;
 
     /** 
      * @dev mapping of the staked contract address to the 
      * current staker index to burn token from.
-     */ 
+     */
     mapping(address => uint) public stakedContractCurrentBurnIndex;
 
     /** 
      * @dev mapping to return true if Cover Note deposited against coverId
-     */ 
+     */
     mapping(uint => CoverNote) public depositedCN;
 
     mapping(address => uint) internal isBookedTokens;
@@ -139,7 +139,7 @@ contract TokenData is Iupgradable {
         codeVal = code;
         if (code == "TOKEXP") {
 
-            val = tokenExponent; 
+            val = tokenExponent;
 
         } else if (code == "TOKSTEP") {
 
@@ -177,7 +177,7 @@ contract TokenData is Iupgradable {
 
             val = joiningFee;
 
-        } 
+        }
     }
 
     /**
@@ -185,7 +185,7 @@ contract TokenData is Iupgradable {
     */
     function changeDependentContractAddress() public { //solhint-disable-line
     }
-    
+
     /**
      * @dev to get the contract staked by a staker 
      * @param _stakerAddress is the address of the staker
@@ -195,13 +195,13 @@ contract TokenData is Iupgradable {
     function getStakerStakedContractByIndex(
         address _stakerAddress,
         uint _stakerIndex
-    ) 
-        public
-        view
-        returns (address stakedContractAddress) 
+    )
+    public
+    view
+    returns (address stakedContractAddress)
     {
         stakedContractAddress = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractAddress;
+        _stakerAddress][_stakerIndex].stakedContractAddress;
     }
 
     /**
@@ -213,13 +213,13 @@ contract TokenData is Iupgradable {
     function getStakerStakedBurnedByIndex(
         address _stakerAddress,
         uint _stakerIndex
-    ) 
-        public
-        view
-        returns (uint burnedAmount) 
+    )
+    public
+    view
+    returns (uint burnedAmount)
     {
         burnedAmount = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].burnedAmount;
+        _stakerAddress][_stakerIndex].burnedAmount;
     }
 
     /**
@@ -231,13 +231,13 @@ contract TokenData is Iupgradable {
     function getStakerStakedUnlockableBeforeLastBurnByIndex(
         address _stakerAddress,
         uint _stakerIndex
-    ) 
-        public
-        view
-        returns (uint unlockable) 
+    )
+    public
+    view
+    returns (uint unlockable)
     {
         unlockable = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].unLockableBeforeLastBurn;
+        _stakerAddress][_stakerIndex].unLockableBeforeLastBurn;
     }
 
     /**
@@ -249,13 +249,13 @@ contract TokenData is Iupgradable {
     function getStakerStakedContractIndex(
         address _stakerAddress,
         uint _stakerIndex
-    ) 
-        public
-        view
-        returns (uint scIndex) 
+    )
+    public
+    view
+    returns (uint scIndex)
     {
         scIndex = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractIndex;
+        _stakerAddress][_stakerIndex].stakedContractIndex;
     }
 
     /**
@@ -267,13 +267,13 @@ contract TokenData is Iupgradable {
     function getStakedContractStakerIndex(
         address _stakedContractAddress,
         uint _stakedContractIndex
-    ) 
-        public
-        view
-        returns (uint sIndex) 
+    )
+    public
+    view
+    returns (uint sIndex)
     {
         sIndex = stakedContractStakers[
-            _stakedContractAddress][_stakedContractIndex].stakerIndex;
+        _stakedContractAddress][_stakedContractIndex].stakerIndex;
     }
 
     /**
@@ -286,12 +286,12 @@ contract TokenData is Iupgradable {
         address _stakerAddress,
         uint _stakerIndex
     )
-        public 
-        view
-        returns (uint amount)
+    public
+    view
+    returns (uint amount)
     {
         amount = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakeAmount;
+        _stakerAddress][_stakerIndex].stakeAmount;
     }
 
     /**
@@ -301,10 +301,10 @@ contract TokenData is Iupgradable {
      */
     function getStakerStakedContractLength(
         address _stakerAddress
-    ) 
-        public
-        view
-        returns (uint length)
+    )
+    public
+    view
+    returns (uint length)
     {
         length = stakerStakedContracts[_stakerAddress].length;
     }
@@ -319,12 +319,12 @@ contract TokenData is Iupgradable {
         address _stakerAddress,
         uint _stakerIndex
     )
-        public 
-        view
-        returns (uint amount)
+    public
+    view
+    returns (uint amount)
     {
         amount = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].unlockedAmount;
+        _stakerAddress][_stakerIndex].unlockedAmount;
     }
 
     /**
@@ -332,18 +332,18 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker to distribute commission.
      * @param _amount amount to be given as commission.
-     */ 
+     */
     function pushUnlockedStakedTokens(
         address _stakerAddress,
         uint _stakerIndex,
         uint _amount
-    )   
-        public
-        onlyInternal
-    {   
+    )
+    public
+    onlyInternal
+    {
         stakerStakedContracts[_stakerAddress][
-            _stakerIndex].unlockedAmount = stakerStakedContracts[_stakerAddress][
-                _stakerIndex].unlockedAmount.add(_amount);
+        _stakerIndex].unlockedAmount = stakerStakedContracts[_stakerAddress][
+        _stakerIndex].unlockedAmount.add(_amount);
     }
 
     /**
@@ -351,18 +351,18 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker.
      * @param _amount amount to be burned.
-     */ 
+     */
     function pushBurnedTokens(
         address _stakerAddress,
         uint _stakerIndex,
         uint _amount
-    )   
-        public
-        onlyInternal
-    {   
+    )
+    public
+    onlyInternal
+    {
         stakerStakedContracts[_stakerAddress][
-            _stakerIndex].burnedAmount = stakerStakedContracts[_stakerAddress][
-                _stakerIndex].burnedAmount.add(_amount);
+        _stakerIndex].burnedAmount = stakerStakedContracts[_stakerAddress][
+        _stakerIndex].burnedAmount.add(_amount);
     }
 
     /**
@@ -370,18 +370,18 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker.
      * @param _amount amount to be added to unlockable.
-     */ 
+     */
     function pushUnlockableBeforeLastBurnTokens(
         address _stakerAddress,
         uint _stakerIndex,
         uint _amount
-    )   
-        public
-        onlyInternal
-    {   
+    )
+    public
+    onlyInternal
+    {
         stakerStakedContracts[_stakerAddress][
-            _stakerIndex].unLockableBeforeLastBurn = stakerStakedContracts[_stakerAddress][
-                _stakerIndex].unLockableBeforeLastBurn.add(_amount);
+        _stakerIndex].unLockableBeforeLastBurn = stakerStakedContracts[_stakerAddress][
+        _stakerIndex].unLockableBeforeLastBurn.add(_amount);
     }
 
     /**
@@ -389,17 +389,17 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker.
      * @param _amount amount to be added to unlockable.
-     */ 
+     */
     function setUnlockableBeforeLastBurnTokens(
         address _stakerAddress,
         uint _stakerIndex,
         uint _amount
-    )   
-        public
-        onlyInternal
-    {   
+    )
+    public
+    onlyInternal
+    {
         stakerStakedContracts[_stakerAddress][
-            _stakerIndex].unLockableBeforeLastBurn = _amount;
+        _stakerIndex].unLockableBeforeLastBurn = _amount;
     }
 
     /**
@@ -408,20 +408,20 @@ contract TokenData is Iupgradable {
      * @param _stakedContractAddress address of smart contract.
      * @param _stakedContractIndex index of the staker to distribute commission.
      * @param _commissionAmount amount to be given as commission.
-     */ 
+     */
     function pushEarnedStakeCommissions(
         address _stakerAddress,
         address _stakedContractAddress,
         uint _stakedContractIndex,
         uint _commissionAmount
-    )   
-        public
-        onlyInternal
+    )
+    public
+    onlyInternal
     {
         stakedContractStakeCommission[_stakedContractAddress][_stakedContractIndex].
-            commissionEarned = stakedContractStakeCommission[_stakedContractAddress][
-                _stakedContractIndex].commissionEarned.add(_commissionAmount);
-                
+        commissionEarned = stakedContractStakeCommission[_stakedContractAddress][
+        _stakedContractIndex].commissionEarned.add(_commissionAmount);
+
         emit Commission(
             _stakerAddress,
             _stakedContractAddress,
@@ -435,22 +435,22 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker to distribute commission.
      * @param _amount amount to be given as commission.
-     */ 
+     */
     function pushRedeemedStakeCommissions(
         address _stakerAddress,
         uint _stakerIndex,
         uint _amount
-    )   
-        public
-        onlyInternal
-    {   
+    )
+    public
+    onlyInternal
+    {
         uint stakedContractIndex = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractIndex;
+        _stakerAddress][_stakerIndex].stakedContractIndex;
         address stakedContractAddress = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractAddress;
+        _stakerAddress][_stakerIndex].stakedContractAddress;
         stakedContractStakeCommission[stakedContractAddress][stakedContractIndex].
-            commissionRedeemed = stakedContractStakeCommission[
-                stakedContractAddress][stakedContractIndex].commissionRedeemed.add(_amount);
+        commissionRedeemed = stakedContractStakeCommission[
+        stakedContractAddress][stakedContractIndex].commissionRedeemed.add(_amount);
     }
 
     /**
@@ -458,14 +458,14 @@ contract TokenData is Iupgradable {
      * for particular stakedcontract on given index.
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker commission.
-     */ 
+     */
     function getStakerEarnedStakeCommission(
         address _stakerAddress,
         uint _stakerIndex
     )
-        public 
-        view
-        returns (uint) 
+    public
+    view
+    returns (uint)
     {
         return _getStakerEarnedStakeCommission(_stakerAddress, _stakerIndex);
     }
@@ -476,14 +476,14 @@ contract TokenData is Iupgradable {
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker commission.
      * @return commissionEarned total amount given to staker.
-     */ 
+     */
     function getStakerRedeemedStakeCommission(
         address _stakerAddress,
         uint _stakerIndex
     )
-        public 
-        view
-        returns (uint) 
+    public
+    view
+    returns (uint)
     {
         return _getStakerRedeemedStakeCommission(_stakerAddress, _stakerIndex);
     }
@@ -492,18 +492,18 @@ contract TokenData is Iupgradable {
      * @dev Gets total stake commission given to an underwriter
      * @param _stakerAddress address of staker.
      * @return totalCommissionEarned total commission earned by staker.
-     */ 
+     */
     function getStakerTotalEarnedStakeCommission(
         address _stakerAddress
     )
-        public 
-        view
-        returns (uint totalCommissionEarned) 
+    public
+    view
+    returns (uint totalCommissionEarned)
     {
         totalCommissionEarned = 0;
         for (uint i = 0; i < stakerStakedContracts[_stakerAddress].length; i++) {
             totalCommissionEarned = totalCommissionEarned.
-                add(_getStakerEarnedStakeCommission(_stakerAddress, i));
+            add(_getStakerEarnedStakeCommission(_stakerAddress, i));
         }
     }
 
@@ -511,13 +511,13 @@ contract TokenData is Iupgradable {
      * @dev Gets total stake commission given to an underwriter
      * @param _stakerAddress address of staker.
      * @return totalCommissionEarned total commission earned by staker.
-     */ 
+     */
     function getStakerTotalReedmedStakeCommission(
         address _stakerAddress
     )
-        public 
-        view
-        returns(uint totalCommissionRedeemed) 
+    public
+    view
+    returns(uint totalCommissionRedeemed)
     {
         totalCommissionRedeemed = 0;
         for (uint i = 0; i < stakerStakedContracts[_stakerAddress].length; i++) {
@@ -535,7 +535,7 @@ contract TokenData is Iupgradable {
     function setDepositCN(uint coverId, bool flag) public onlyInternal {
 
         if (flag == true) {
-            require(!depositedCN[coverId].isDeposited, "Cover note already deposited");    
+            require(!depositedCN[coverId].isDeposited, "Cover note already deposited");
         }
 
         depositedCN[coverId].isDeposited = flag;
@@ -562,12 +562,12 @@ contract TokenData is Iupgradable {
         address _stakedContractAddress,
         uint _stakedContractIndex
     )
-        public
-        view
-        returns (address stakerAddress)
+    public
+    view
+    returns (address stakerAddress)
     {
         stakerAddress = stakedContractStakers[
-            _stakedContractAddress][_stakedContractIndex].stakerAddress;
+        _stakedContractAddress][_stakedContractIndex].stakerAddress;
     }
 
     /**
@@ -577,14 +577,14 @@ contract TokenData is Iupgradable {
      */
     function getStakedContractStakersLength(
         address _stakedContractAddress
-    ) 
-        public
-        view
-        returns (uint length)
+    )
+    public
+    view
+    returns (uint length)
     {
         length = stakedContractStakers[_stakedContractAddress].length;
-    } 
-    
+    }
+
     /**
      * @dev Adds a new stake record.
      * @param _stakerAddress staker address.
@@ -595,10 +595,10 @@ contract TokenData is Iupgradable {
         address _stakerAddress,
         address _stakedContractAddress,
         uint _amount
-    ) 
-        public
-        onlyInternal
-        returns(uint scIndex) 
+    )
+    public
+    onlyInternal
+    returns(uint scIndex)
     {
         scIndex = (stakedContractStakers[_stakedContractAddress].push(
             Staker(_stakerAddress, stakerStakedContracts[_stakerAddress].length))).sub(1);
@@ -635,8 +635,8 @@ contract TokenData is Iupgradable {
         address _stakedContractAddress,
         uint _index
     )
-        public
-        onlyInternal
+    public
+    onlyInternal
     {
         stakedContractCurrentCommissionIndex[_stakedContractAddress] = _index;
     }
@@ -650,8 +650,8 @@ contract TokenData is Iupgradable {
         address _stakerAddress,
         uint _index
     )
-        public
-        onlyInternal
+    public
+    onlyInternal
     {
         lastCompletedStakeCommission[_stakerAddress] = _index;
     }
@@ -665,8 +665,8 @@ contract TokenData is Iupgradable {
         address _stakedContractAddress,
         uint _index
     )
-        public
-        onlyInternal
+    public
+    onlyInternal
     {
         stakedContractCurrentBurnIndex[_stakedContractAddress] = _index;
     }
@@ -680,7 +680,7 @@ contract TokenData is Iupgradable {
         require(ms.checkIsAuthToGoverned(msg.sender));
         if (code == "TOKEXP") {
 
-            _setTokenExponent(val); 
+            _setTokenExponent(val);
 
         } else if (code == "TOKSTEP") {
 
@@ -720,7 +720,7 @@ contract TokenData is Iupgradable {
 
         } else {
             revert("Invalid param code");
-        } 
+        }
     }
 
     /**
@@ -728,23 +728,23 @@ contract TokenData is Iupgradable {
      * underwriter for particular stakedcontract on given index.
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker commission.
-     */ 
+     */
     function _getStakerEarnedStakeCommission(
         address _stakerAddress,
         uint _stakerIndex
     )
-        internal
-        view 
-        returns (uint amount) 
+    internal
+    view
+    returns (uint amount)
     {
         uint _stakedContractIndex;
         address _stakedContractAddress;
         _stakedContractAddress = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractAddress;
+        _stakerAddress][_stakerIndex].stakedContractAddress;
         _stakedContractIndex = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractIndex;
+        _stakerAddress][_stakerIndex].stakedContractIndex;
         amount = stakedContractStakeCommission[
-            _stakedContractAddress][_stakedContractIndex].commissionEarned;
+        _stakedContractAddress][_stakedContractIndex].commissionEarned;
     }
 
     /**
@@ -752,23 +752,23 @@ contract TokenData is Iupgradable {
      * underwriter for particular stakedcontract on given index.
      * @param _stakerAddress address of staker.
      * @param _stakerIndex index of the staker commission.
-     */ 
+     */
     function _getStakerRedeemedStakeCommission(
         address _stakerAddress,
         uint _stakerIndex
     )
-        internal
-        view 
-        returns (uint amount) 
+    internal
+    view
+    returns (uint amount)
     {
         uint _stakedContractIndex;
         address _stakedContractAddress;
         _stakedContractAddress = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractAddress;
+        _stakerAddress][_stakerIndex].stakedContractAddress;
         _stakedContractIndex = stakerStakedContracts[
-            _stakerAddress][_stakerIndex].stakedContractIndex;
+        _stakerAddress][_stakerIndex].stakedContractIndex;
         amount = stakedContractStakeCommission[
-            _stakedContractAddress][_stakedContractIndex].commissionRedeemed;
+        _stakedContractAddress][_stakedContractIndex].commissionRedeemed;
     }
 
     /**
@@ -805,7 +805,7 @@ contract TokenData is Iupgradable {
 
     /**
      * @dev Changes number of days for which NXM needs to staked in case of underwriting
-     */ 
+     */
     function _changeSCValidDays(uint _days) internal {
         scValidDays = _days;
     }
@@ -814,7 +814,7 @@ contract TokenData is Iupgradable {
      * @dev Changes the time period up to which tokens will be locked.
      *      Used to generate the validity period of tokens booked by
      *      a user for participating in claim's assessment/claim's voting.
-     */ 
+     */
     function _changeBookTime(uint _time) internal {
         bookTime = _time;
     }
@@ -822,22 +822,22 @@ contract TokenData is Iupgradable {
     /**
      * @dev Changes lock CA days - number of days for which tokens 
      * are locked while submitting a vote.
-     */ 
+     */
     function _changelockCADays(uint _val) internal {
         lockCADays = _val;
     }
-    
+
     /**
      * @dev Changes lock MV days - number of days for which tokens are locked
      * while submitting a vote.
-     */ 
+     */
     function _changelockMVDays(uint _val) internal {
         lockMVDays = _val;
     }
 
     /**
      * @dev Changes extra lock period for a cover, post its expiry.
-     */ 
+     */
     function _setLockTokenTimeAfterCoverExp(uint time) internal {
         lockTokenTimeAfterCoverExp = time;
     }
