@@ -12,8 +12,8 @@
 
 pragma solidity 0.5.7;
 import "./TokenFunctions.sol";
-import "./external/govblocks-protocol/interfaces/IMemberRoles.sol";
-import "./external/govblocks-protocol/Governed.sol";
+import "./IMemberRoles.sol";
+import "./Governed.sol";
 import "./TokenController.sol";
 import "./ClaimsReward.sol";
 import "./TokenData.sol";
@@ -40,13 +40,12 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
 
     enum Role {UnAssigned, AdvisoryBoard, Member, Owner}
 
-    event switchedMembership(address indexed previousMember, address indexed newMember, uint timeStamp);
-
     MemberRoleDetails[] internal memberRoleData;
     bool internal constructorCheck;
     uint public maxABCount;
     bool public launched;
     uint public launchedOn;
+
     modifier checkRoleAuthority(uint _memberRoleId) {
         if (memberRoleData[_memberRoleId].authorized != address(0))
             require(msg.sender == memberRoleData[_memberRoleId].authorized);
@@ -94,13 +93,13 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
         //Ensure that NXMaster has initialized.
         require(ms.masterInitialized());
 
-        require(maxABCount >= 
+        require(maxABCount >=
             SafeMath.add(numberOfMembers(uint(Role.AdvisoryBoard)), abArray.length)
         );
         //AB count can't exceed maxABCount
         for (uint i = 0; i < abArray.length; i++) {
             require(checkRole(abArray[i], uint(MemberRoles.Role.Member)));
-            _updateRole(abArray[i], uint(Role.AdvisoryBoard), true);   
+            _updateRole(abArray[i], uint(Role.AdvisoryBoard), true);
         }
     }
 
@@ -135,9 +134,9 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
         masterAddress = _masterAddress;
         ms = INXMMaster(_masterAddress);
         nxMasterAddress = _masterAddress;
-        
+
     }
-    
+
     /**
      * @dev to initiate the member roles
      * @param _firstAB is the address of the first AB member
@@ -196,17 +195,17 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
 
     }
 
-   /** 
-     * @dev Called by user to pay joining membership fee
-     */ 
+    /**
+      * @dev Called by user to pay joining membership fee
+      */
     function payJoiningFee(address _userAddress) public payable {
         require(_userAddress != address(0));
         require(!ms.isPause(), "Emergency Pause Applied");
         if (msg.sender == address(ms.getLatestAddress("QT"))) {
             require(td.walletAddress() != address(0), "No walletAddress present");
             dAppToken.addToWhitelist(_userAddress);
-            _updateRole(_userAddress, uint(Role.Member), true);            
-            td.walletAddress().transfer(msg.value); 
+            _updateRole(_userAddress, uint(Role.Member), true);
+            td.walletAddress().transfer(msg.value);
         } else {
             require(!qd.refundEligible(_userAddress));
             require(!ms.isMember(_userAddress));
@@ -233,7 +232,7 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
             dAppToken.addToWhitelist(_userAddress);
             _updateRole(_userAddress, uint(Role.Member), true);
             td.walletAddress().transfer(fee); //solhint-disable-line
-            
+
         } else {
             qd.setRefundEligible(_userAddress, false);
             _userAddress.transfer(td.joiningFee()); //solhint-disable-line
@@ -241,38 +240,17 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
     }
 
     /**
-     * @dev Called by existed member if wish to Withdraw membership.
+     * @dev Called by existed member if if wish to Withdraw membership.
      */
     function withdrawMembership() public {
         require(!ms.isPause() && ms.isMember(msg.sender));
         require(dAppToken.totalLockedBalance(msg.sender, now) == 0); //solhint-disable-line
         require(!tf.isLockedForMemberVote(msg.sender)); // No locked tokens for Member/Governance voting
         require(cr.getAllPendingRewardOfUser(msg.sender) == 0); // No pending reward to be claimed(claim assesment).
-        require(dAppToken.tokensUnlockable(msg.sender, "CLA") == 0, "Member should have no CLA unlockable tokens");
         gv.removeDelegation(msg.sender);
         dAppToken.burnFrom(msg.sender, tk.balanceOf(msg.sender));
         _updateRole(msg.sender, uint(Role.Member), false);
-        dAppToken.removeFromWhitelist(msg.sender); // need clarification on whitelist        
-    }
-
-
-    /**
-     * @dev Called by existed member if wish to switch membership to other address.
-     * @param _add address of user to forward membership.
-     */
-    function switchMembership(address _add) external {
-        require(!ms.isPause() && ms.isMember(msg.sender) && !ms.isMember(_add));
-        require(dAppToken.totalLockedBalance(msg.sender, now) == 0); //solhint-disable-line
-        require(!tf.isLockedForMemberVote(msg.sender)); // No locked tokens for Member/Governance voting
-        require(cr.getAllPendingRewardOfUser(msg.sender) == 0); // No pending reward to be claimed(claim assesment).
-        require(dAppToken.tokensUnlockable(msg.sender, "CLA") == 0, "Member should have no CLA unlockable tokens");
-        gv.removeDelegation(msg.sender);
-        dAppToken.addToWhitelist(_add);
-        _updateRole(_add, uint(Role.Member), true);
-        tk.transferFrom(msg.sender, _add, tk.balanceOf(msg.sender));
-        _updateRole(msg.sender, uint(Role.Member), false);
-        dAppToken.removeFromWhitelist(msg.sender);
-        emit switchedMembership(msg.sender, _add, now);
+        dAppToken.removeFromWhitelist(msg.sender); // need clarification on whitelist
     }
 
     /// @dev Return number of member roles
@@ -323,7 +301,7 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
     function roles(address _memberAddress) public view returns(uint[] memory) { //solhint-disable-line
         uint length = memberRoleData.length;
         uint[] memory assignedRoles = new uint[](length);
-        uint counter = 0; 
+        uint counter = 0;
         for (uint i = 1; i < length; i++) {
             if (memberRoleData[i].memberActive[_memberAddress]) {
                 assignedRoles[counter] = i;
@@ -360,7 +338,7 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
      * @dev to update the member roles
      * @param _memberAddress in concern
      * @param _roleId the id of role
-     * @param _active if active is true, add the member, else remove it 
+     * @param _active if active is true, add the member, else remove it
      */
     function _updateRole(address _memberAddress,
         uint _roleId,
@@ -401,9 +379,9 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
         address _memberAddress,
         address[] memory memberArray
     )
-        internal
-        pure
-        returns(bool memberExists)
+    internal
+    pure
+    returns(bool memberExists)
     {
         uint i;
         for (i = 0; i < memberArray.length; i++) {
@@ -443,12 +421,4 @@ contract MemberRoles is IMemberRoles, Governed, Iupgradable {
         launchedOn = 0;
     }
 
-    function memberAtIndex(uint _memberRoleId, uint index) external view returns (address, bool) {
-        address memberAddress = memberRoleData[_memberRoleId].memberAddress[index];
-        return (memberAddress, memberRoleData[_memberRoleId].memberActive[memberAddress]);
-    }
-
-    function membersLength(uint _memberRoleId) external view returns (uint) {
-        return memberRoleData[_memberRoleId].memberAddress.length;
-    }
 }

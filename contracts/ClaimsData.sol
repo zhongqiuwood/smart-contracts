@@ -16,7 +16,7 @@
 pragma solidity 0.5.7;
 
 import "./Iupgradable.sol";
-import "./external/openzeppelin-solidity/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 
 contract ClaimsData is Iupgradable {
@@ -105,7 +105,7 @@ contract ClaimsData is Iupgradable {
     uint public maxVoteThreshold;
     uint public majorityConsensus;
     uint public pauseDaysCA;
-   
+
     event ClaimRaise(
         uint indexed coverId,
         address indexed userAddress,
@@ -139,38 +139,38 @@ contract ClaimsData is Iupgradable {
     }
 
     /**
-     * @dev Updates the pending claim start variable, 
+     * @dev Updates the pending claim start variable,
      * the lowest claim id with a pending decision/payout.
-     */ 
+     */
     function setpendingClaimStart(uint _start) external onlyInternal {
         require(pendingClaimStart <= _start);
         pendingClaimStart = _start;
     }
 
-    /** 
-     * @dev Updates the max vote index for which claim assessor has received reward 
+    /**
+     * @dev Updates the max vote index for which claim assessor has received reward
      * @param _voter address of the voter.
      * @param caIndex last index till which reward was distributed for CA
-     */ 
+     */
     function setRewardDistributedIndexCA(address _voter, uint caIndex) external onlyInternal {
         voterVoteRewardReceived[_voter].lastCAvoteIndex = caIndex;
 
     }
 
-    /** 
-     * @dev Used to pause claim assessor activity for 3 days 
+    /**
+     * @dev Used to pause claim assessor activity for 3 days
      * @param user Member address whose claim voting ability needs to be paused
-     */ 
+     */
     function setUserClaimVotePausedOn(address user) external {
         require(ms.checkIsAuthToGoverned(msg.sender));
         userClaimVotePausedOn[user] = now;
     }
 
     /**
-     * @dev Updates the max vote index for which member has received reward 
+     * @dev Updates the max vote index for which member has received reward
      * @param _voter address of the voter.
-     * @param mvIndex last index till which reward was distributed for member 
-     */ 
+     * @param mvIndex last index till which reward was distributed for member
+     */
     function setRewardDistributedIndexMV(address _voter, uint mvIndex) external onlyInternal {
 
         voterVoteRewardReceived[_voter].lastMVvoteIndex = mvIndex;
@@ -181,15 +181,15 @@ contract ClaimsData is Iupgradable {
      * @param percCA reward Percentage reward for claim assessor
      * @param percMV reward Percentage reward for members
      * @param tokens total tokens to be rewarded
-     */ 
+     */
     function setClaimRewardDetail(
         uint claimid,
         uint percCA,
         uint percMV,
         uint tokens
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         claimRewardDetail[claimid].percCA = percCA;
         claimRewardDetail[claimid].percMV = percMV;
@@ -200,7 +200,7 @@ contract ClaimsData is Iupgradable {
      * @dev Sets the reward claim status against a vote id.
      * @param _voteid vote Id.
      * @param claimed true if reward for vote is claimed, else false.
-     */ 
+     */
     function setRewardClaimed(uint _voteid, bool claimed) external onlyInternal {
         allvotes[_voteid].rewardClaimed = claimed;
     }
@@ -209,22 +209,22 @@ contract ClaimsData is Iupgradable {
      * @dev Sets the final vote's result(either accepted or declined)of a claim.
      * @param _claimId Claim Id.
      * @param _verdict 1 if claim is accepted,-1 if declined.
-     */ 
+     */
     function changeFinalVerdict(uint _claimId, int8 _verdict) external onlyInternal {
         claimVote[_claimId] = _verdict;
     }
-    
+
     /**
      * @dev Creates a new claim.
-     */ 
+     */
     function addClaim(
         uint _claimId,
         uint _coverId,
         address _from,
         uint _nowtime
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         allClaims.push(Claim(_coverId, _nowtime));
         allClaimsByAddress[_from].push(_claimId);
@@ -232,20 +232,20 @@ contract ClaimsData is Iupgradable {
 
     /**
      * @dev Add Vote's details of a given claim.
-     */ 
+     */
     function addVote(
         address _voter,
         uint _tokens,
         uint claimId,
         int8 _verdict
-    ) 
-        external
-        onlyInternal
+    )
+    external
+    onlyInternal
     {
         allvotes.push(Vote(_voter, _tokens, claimId, _verdict, false));
     }
 
-    /** 
+    /**
      * @dev Stores the id of the claim assessor vote given to a claim.
      * Maintains record of all votes given by all the CA to a claim.
      * @param _claimId Claim Id to which vote has given by the CA.
@@ -255,19 +255,19 @@ contract ClaimsData is Iupgradable {
         claimVoteCA[_claimId].push(_voteid);
     }
 
-    /** 
+    /**
      * @dev Sets the id of the vote.
      * @param _from Claim assessor's address who has given the vote.
      * @param _claimId Claim Id for which vote has been given by the CA.
      * @param _voteid Vote Id which will be stored against the given _from and claimid.
-     */ 
+     */
     function setUserClaimVoteCA(
         address _from,
         uint _claimId,
         uint _voteid
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         userClaimVoteCA[_from][_claimId] = _voteid;
         voteAddressCA[_from].push(_voteid);
@@ -279,7 +279,7 @@ contract ClaimsData is Iupgradable {
      * @param _vote 1 for accept and increases the tokens of claim as accept,
      * -1 for deny and increases the tokens of claim as deny.
      * @param _tokens Number of tokens.
-     */ 
+     */
     function setClaimTokensCA(uint _claimId, int8 _vote, uint _tokens) external onlyInternal {
         if (_vote == 1)
             claimTokensCA[_claimId].accept = claimTokensCA[_claimId].accept.add(_tokens);
@@ -287,13 +287,13 @@ contract ClaimsData is Iupgradable {
             claimTokensCA[_claimId].deny = claimTokensCA[_claimId].deny.add(_tokens);
     }
 
-    /** 
+    /**
      * @dev Stores the tokens locked by the Members during voting of a given claim.
      * @param _claimId Claim Id.
      * @param _vote 1 for accept and increases the tokens of claim as accept,
      * -1 for deny and increases the tokens of claim as deny.
      * @param _tokens Number of tokens.
-     */ 
+     */
     function setClaimTokensMV(uint _claimId, int8 _vote, uint _tokens) external onlyInternal {
         if (_vote == 1)
             claimTokensMV[_claimId].accept = claimTokensMV[_claimId].accept.add(_tokens);
@@ -301,43 +301,43 @@ contract ClaimsData is Iupgradable {
             claimTokensMV[_claimId].deny = claimTokensMV[_claimId].deny.add(_tokens);
     }
 
-    /** 
+    /**
      * @dev Stores the id of the member vote given to a claim.
      * Maintains record of all votes given by all the Members to a claim.
      * @param _claimId Claim Id to which vote has been given by the Member.
      * @param _voteid Vote Id.
-     */ 
+     */
     function addClaimVotemember(uint _claimId, uint _voteid) external onlyInternal {
         claimVoteMember[_claimId].push(_voteid);
     }
 
-    /** 
+    /**
      * @dev Sets the id of the vote.
      * @param _from Member's address who has given the vote.
      * @param _claimId Claim Id for which vote has been given by the Member.
      * @param _voteid Vote Id which will be stored against the given _from and claimid.
-     */ 
+     */
     function setUserClaimVoteMember(
         address _from,
         uint _claimId,
         uint _voteid
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         userClaimVoteMember[_from][_claimId] = _voteid;
         voteAddressMember[_from].push(_voteid);
 
     }
 
-    /** 
+    /**
      * @dev Increases the count of failure until payout of a claim is successful.
-     */ 
+     */
     function updateState12Count(uint _claimId, uint _cnt) external onlyInternal {
         claimState12Count[_claimId] = claimState12Count[_claimId].add(_cnt);
     }
 
-    /** 
+    /**
      * @dev Sets status of a claim.
      * @param _claimId Claim Id.
      * @param _stat Status number.
@@ -346,87 +346,87 @@ contract ClaimsData is Iupgradable {
         claimsStatus[_claimId] = _stat;
     }
 
-    /** 
+    /**
      * @dev Sets the timestamp of a given claim at which the Claim's details has been updated.
      * @param _claimId Claim Id of claim which has been changed.
      * @param _dateUpd timestamp at which claim is updated.
-     */ 
+     */
     function setClaimdateUpd(uint _claimId, uint _dateUpd) external onlyInternal {
         allClaims[_claimId].dateUpd = _dateUpd;
     }
 
-    /** 
+    /**
      @dev Queues Claims during Emergency Pause.
-     */ 
+     */
     function setClaimAtEmergencyPause(
         uint _coverId,
         uint _dateUpd,
         bool _submit
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         claimPause.push(ClaimsPause(_coverId, _dateUpd, _submit));
     }
 
-    /** 
+    /**
      * @dev Set submission flag for Claims queued during emergency pause.
      * Set to true after EP is turned off and the claim is submitted .
-     */ 
+     */
     function setClaimSubmittedAtEPTrue(uint _index, bool _submit) external onlyInternal {
         claimPause[_index].submit = _submit;
     }
 
-    /** 
-     * @dev Sets the index from which claim needs to be 
+    /**
+     * @dev Sets the index from which claim needs to be
      * submitted when emergency pause is swithched off.
-     */ 
+     */
     function setFirstClaimIndexToSubmitAfterEP(
         uint _firstClaimIndexToSubmit
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         claimPauseLastsubmit = _firstClaimIndexToSubmit;
     }
 
-    /** 
+    /**
      * @dev Sets the pending vote duration for a claim in case of emergency pause.
-     */ 
+     */
     function setPendingClaimDetails(
         uint _claimId,
         uint _pendingTime,
         bool _voting
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         claimPauseVotingEP.push(ClaimPauseVoting(_claimId, _pendingTime, _voting));
     }
 
-    /** 
+    /**
      * @dev Sets voting flag true after claim is reopened for voting after emergency pause.
-     */ 
+     */
     function setPendingClaimVoteStatus(uint _claimId, bool _vote) external onlyInternal {
         claimPauseVotingEP[_claimId].voting = _vote;
     }
-    
-    /** 
-     * @dev Sets the index from which claim needs to be 
-     * reopened when emergency pause is swithched off. 
-     */ 
+
+    /**
+     * @dev Sets the index from which claim needs to be
+     * reopened when emergency pause is swithched off.
+     */
     function setFirstClaimIndexToStartVotingAfterEP(
         uint _claimStartVotingFirstIndex
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         claimStartVotingFirstIndex = _claimStartVotingFirstIndex;
     }
 
-    /** 
+    /**
      * @dev Calls Vote Event.
-     */ 
+     */
     function callVoteEvent(
         address _userAddress,
         uint _claimId,
@@ -435,8 +435,8 @@ contract ClaimsData is Iupgradable {
         uint _submitDate,
         int8 _verdict
     )
-        external
-        onlyInternal
+    external
+    onlyInternal
     {
         emit VoteCast(
             _userAddress,
@@ -448,17 +448,17 @@ contract ClaimsData is Iupgradable {
         );
     }
 
-    /** 
-     * @dev Calls Claim Event. 
-     */ 
+    /**
+     * @dev Calls Claim Event.
+     */
     function callClaimEvent(
         uint _coverId,
         address _userAddress,
         uint _claimId,
         uint _datesubmit
-    ) 
-        external
-        onlyInternal
+    )
+    external
+    onlyInternal
     {
         emit ClaimRaise(_coverId, _userAddress, _claimId, _datesubmit);
     }
@@ -505,22 +505,22 @@ contract ClaimsData is Iupgradable {
         } else if (code == "CAPAUSET") {
             val = pauseDaysCA / (1 days);
         }
-    
+
     }
 
     /**
      * @dev Get claim queued during emergency pause by index.
-     */ 
+     */
     function getClaimOfEmergencyPauseByIndex(
         uint _index
-    ) 
-        external
-        view
-        returns(
-            uint coverId,
-            uint dateUpd,
-            bool submit
-        )
+    )
+    external
+    view
+    returns(
+        uint coverId,
+        uint dateUpd,
+        bool submit
+    )
     {
         coverId = claimPause[_index].coverid;
         dateUpd = claimPause[_index].dateUpd;
@@ -528,61 +528,61 @@ contract ClaimsData is Iupgradable {
     }
 
     /**
-     * @dev Gets the Claim's details of given claimid.   
-     */ 
+     * @dev Gets the Claim's details of given claimid.
+     */
     function getAllClaimsByIndex(
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint coverId,
-            int8 vote,
-            uint status,
-            uint dateUpd,
-            uint state12Count
-        )
+    external
+    view
+    returns(
+        uint coverId,
+        int8 vote,
+        uint status,
+        uint dateUpd,
+        uint state12Count
+    )
     {
         return(
-            allClaims[_claimId].coverId,
-            claimVote[_claimId],
-            claimsStatus[_claimId],
-            allClaims[_claimId].dateUpd,
-            claimState12Count[_claimId]
+        allClaims[_claimId].coverId,
+        claimVote[_claimId],
+        claimsStatus[_claimId],
+        allClaims[_claimId].dateUpd,
+        claimState12Count[_claimId]
         );
     }
 
-    /** 
+    /**
      * @dev Gets the vote id of a given claim of a given Claim Assessor.
-     */ 
+     */
     function getUserClaimVoteCA(
         address _add,
         uint _claimId
     )
-        external
-        view
-        returns(uint idVote)
+    external
+    view
+    returns(uint idVote)
     {
         return userClaimVoteCA[_add][_claimId];
     }
 
-    /** 
+    /**
      * @dev Gets the vote id of a given claim of a given member.
      */
     function getUserClaimVoteMember(
         address _add,
         uint _claimId
     )
-        external
-        view
-        returns(uint idVote)
+    external
+    view
+    returns(uint idVote)
     {
         return userClaimVoteMember[_add][_claimId];
     }
 
-    /** 
+    /**
      * @dev Gets the count of all votes.
-     */ 
+     */
     function getAllVoteLength() external view returns(uint voteCount) {
         return allvotes.length.sub(1); //Start Index always from 1.
     }
@@ -590,8 +590,8 @@ contract ClaimsData is Iupgradable {
     /**
      * @dev Gets the status number of a given claim.
      * @param _claimId Claim id.
-     * @return statno Status Number. 
-     */ 
+     * @return statno Status Number.
+     */
     function getClaimStatusNumber(uint _claimId) external view returns(uint claimId, uint statno) {
         return (_claimId, claimsStatus[_claimId]);
     }
@@ -606,16 +606,16 @@ contract ClaimsData is Iupgradable {
         return (rewardStatus[statusNumber].percCA, rewardStatus[statusNumber].percMV);
     }
 
-    /** 
+    /**
      * @dev Gets the number of tries that have been made for a successful payout of a Claim.
-     */ 
+     */
     function getClaimState12Count(uint _claimId) external view returns(uint num) {
         num = claimState12Count[_claimId];
     }
 
-    /** 
+    /**
      * @dev Gets the last update date of a claim.
-     */ 
+     */
     function getClaimDateUpd(uint _claimId) external view returns(uint dateupd) {
         dateupd = allClaims[_claimId].dateUpd;
     }
@@ -624,64 +624,64 @@ contract ClaimsData is Iupgradable {
      * @dev Gets all Claims created by a user till date.
      * @param _member user's address.
      * @return claimarr List of Claims id.
-     */ 
+     */
     function getAllClaimsByAddress(address _member) external view returns(uint[] memory claimarr) {
         return allClaimsByAddress[_member];
     }
 
     /**
-     * @dev Gets the number of tokens that has been locked 
+     * @dev Gets the number of tokens that has been locked
      * while giving vote to a claim by  Claim Assessors.
      * @param _claimId Claim Id.
      * @return accept Total number of tokens when CA accepts the claim.
      * @return deny Total number of tokens when CA declines the claim.
-     */ 
+     */
     function getClaimsTokenCA(
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint accept,
-            uint deny
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint accept,
+        uint deny
+    )
     {
         return (
-            _claimId,
-            claimTokensCA[_claimId].accept,
-            claimTokensCA[_claimId].deny
+        _claimId,
+        claimTokensCA[_claimId].accept,
+        claimTokensCA[_claimId].deny
         );
     }
 
-    /** 
+    /**
      * @dev Gets the number of tokens that have been
      * locked while assessing a claim as a member.
      * @param _claimId Claim Id.
      * @return accept Total number of tokens in acceptance of the claim.
      * @return deny Total number of tokens against the claim.
-     */ 
+     */
     function getClaimsTokenMV(
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint accept,
-            uint deny
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint accept,
+        uint deny
+    )
     {
         return (
-            _claimId,
-            claimTokensMV[_claimId].accept,
-            claimTokensMV[_claimId].deny
+        _claimId,
+        claimTokensMV[_claimId].accept,
+        claimTokensMV[_claimId].deny
         );
     }
 
     /**
      * @dev Gets the total number of votes cast as Claims assessor for/against a given claim
-     */ 
+     */
     function getCaClaimVotesToken(uint _claimId) external view returns(uint claimId, uint cnt) {
         claimId = _claimId;
         cnt = 0;
@@ -691,14 +691,14 @@ contract ClaimsData is Iupgradable {
     }
 
     /**
-     * @dev Gets the total number of tokens cast as a member for/against a given claim  
-     */ 
+     * @dev Gets the total number of tokens cast as a member for/against a given claim
+     */
     function getMemberClaimVotesToken(
         uint _claimId
-    )   
-        external
-        view
-        returns(uint claimId, uint cnt)
+    )
+    external
+    view
+    returns(uint claimId, uint cnt)
     {
         claimId = _claimId;
         cnt = 0;
@@ -718,19 +718,19 @@ contract ClaimsData is Iupgradable {
         uint claimId,
         int8 verdict,
         bool rewardClaimed
-        )
+    )
     {
         return (
-            allvotes[_voteid].tokens,
-            allvotes[_voteid].claimId,
-            allvotes[_voteid].verdict,
-            allvotes[_voteid].rewardClaimed
+        allvotes[_voteid].tokens,
+        allvotes[_voteid].claimId,
+        allvotes[_voteid].verdict,
+        allvotes[_voteid].rewardClaimed
         );
     }
 
     /**
      * @dev Gets the voter's address of a given vote id.
-     */ 
+     */
     function getVoterVote(uint _voteid) external view returns(address voter) {
         return allvotes[_voteid].voter;
     }
@@ -738,29 +738,29 @@ contract ClaimsData is Iupgradable {
     /**
      * @dev Provides information of a Claim when given its claim id.
      * @param _claimId Claim Id.
-     */ 
+     */
     function getClaim(
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint coverId,
-            int8 vote,
-            uint status,
-            uint dateUpd,
-            uint state12Count
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint coverId,
+        int8 vote,
+        uint status,
+        uint dateUpd,
+        uint state12Count
+    )
     {
         return (
-            _claimId,
-            allClaims[_claimId].coverId,
-            claimVote[_claimId],
-            claimsStatus[_claimId],
-            allClaims[_claimId].dateUpd,
-            claimState12Count[_claimId]
-            );
+        _claimId,
+        allClaims[_claimId].coverId,
+        claimVote[_claimId],
+        claimsStatus[_claimId],
+        allClaims[_claimId].dateUpd,
+        claimState12Count[_claimId]
+        );
     }
 
     /**
@@ -769,14 +769,14 @@ contract ClaimsData is Iupgradable {
      * @param _ca if 1: votes given by Claim Assessors to a claim,
      * else returns the number of votes of given by Members to a claim.
      * @return len total number of votes for/against a given claim.
-     */ 
+     */
     function getClaimVoteLength(
         uint _claimId,
         uint8 _ca
     )
-        external
-        view
-        returns(uint claimId, uint len)
+    external
+    view
+    returns(uint claimId, uint len)
     {
         claimId = _claimId;
         if (_ca == 1)
@@ -789,15 +789,15 @@ contract ClaimsData is Iupgradable {
      * @dev Gets the verdict of a vote using claim id and index.
      * @param _ca 1 for vote given as a CA, else for vote given as a member.
      * @return ver 1 if vote was given in favour,-1 if given in against.
-     */ 
+     */
     function getVoteVerdict(
         uint _claimId,
         uint _index,
         uint8 _ca
     )
-        external
-        view
-        returns(int8 ver)
+    external
+    view
+    returns(int8 ver)
     {
         if (_ca == 1)
             ver = allvotes[claimVoteCA[_claimId][_index]].verdict;
@@ -809,15 +809,15 @@ contract ClaimsData is Iupgradable {
      * @dev Gets the Number of tokens of a vote using claim id and index.
      * @param _ca 1 for vote given as a CA, else for vote given as a member.
      * @return tok Number of tokens.
-     */ 
+     */
     function getVoteToken(
         uint _claimId,
         uint _index,
         uint8 _ca
-    )   
-        external
-        view
-        returns(uint tok)
+    )
+    external
+    view
+    returns(uint tok)
     {
         if (_ca == 1)
             tok = allvotes[claimVoteCA[_claimId][_index]].tokens;
@@ -829,15 +829,15 @@ contract ClaimsData is Iupgradable {
      * @dev Gets the Voter's address of a vote using claim id and index.
      * @param _ca 1 for vote given as a CA, else for vote given as a member.
      * @return voter Voter's address.
-     */ 
+     */
     function getVoteVoter(
         uint _claimId,
         uint _index,
         uint8 _ca
     )
-        external
-        view
-        returns(address voter)
+    external
+    view
+    returns(address voter)
     {
         if (_ca == 1)
             voter = allvotes[claimVoteCA[_claimId][_index]].voter;
@@ -845,51 +845,51 @@ contract ClaimsData is Iupgradable {
             voter = allvotes[claimVoteMember[_claimId][_index]].voter;
     }
 
-    /** 
+    /**
      * @dev Gets total number of Claims created by a user till date.
      * @param _add User's address.
-     */ 
+     */
     function getUserClaimCount(address _add) external view returns(uint len) {
         len = allClaimsByAddress[_add].length;
     }
 
     /**
      * @dev Calculates number of Claims that are in pending state.
-     */ 
+     */
     function getClaimLength() external view returns(uint len) {
         len = allClaims.length.sub(pendingClaimStart);
     }
 
     /**
      * @dev Gets the Number of all the Claims created till date.
-     */ 
+     */
     function actualClaimLength() external view returns(uint len) {
         len = allClaims.length;
     }
 
-    /** 
+    /**
      * @dev Gets details of a claim.
      * @param _index claim id = pending claim start + given index
      * @param _add User's address.
      * @return coverid cover against which claim has been submitted.
      * @return claimId Claim  Id.
-     * @return voteCA verdict of vote given as a Claim Assessor.  
+     * @return voteCA verdict of vote given as a Claim Assessor.
      * @return voteMV verdict of vote given as a Member.
      * @return statusnumber Status of claim.
-     */ 
+     */
     function getClaimFromNewStart(
         uint _index,
         address _add
     )
-        external
-        view
-        returns(
-            uint coverid,
-            uint claimId,
-            int8 voteCA,
-            int8 voteMV,
-            uint statusnumber
-        )
+    external
+    view
+    returns(
+        uint coverid,
+        uint claimId,
+        int8 voteCA,
+        int8 voteMV,
+        uint statusnumber
+    )
     {
         uint i = pendingClaimStart.add(_index);
         coverid = allClaims[i].coverId;
@@ -908,19 +908,19 @@ contract ClaimsData is Iupgradable {
     }
 
     /**
-     * @dev Gets details of a claim of a user at a given index.  
-     */ 
+     * @dev Gets details of a claim of a user at a given index.
+     */
     function getUserClaimByIndex(
         uint _index,
         address _add
     )
-        external
-        view
-        returns(
-            uint status,
-            uint coverid,
-            uint claimId
-        )
+    external
+    view
+    returns(
+        uint status,
+        uint coverid,
+        uint claimId
+    )
     {
         claimId = allClaimsByAddress[_add][_index];
         status = claimsStatus[claimId];
@@ -932,36 +932,36 @@ contract ClaimsData is Iupgradable {
      * @param _claimId Claim Id.
      * @return ca id of all the votes given by Claim assessors to a claim.
      * @return mv id of all the votes given by members to a claim.
-     */ 
+     */
     function getAllVotesForClaim(
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint[] memory ca,
-            uint[] memory mv
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint[] memory ca,
+        uint[] memory mv
+    )
     {
         return (_claimId, claimVoteCA[_claimId], claimVoteMember[_claimId]);
     }
 
-    /** 
+    /**
      * @dev Gets Number of tokens deposit in a vote using
      * Claim assessor's address and claim id.
      * @return tokens Number of deposited tokens.
-     */ 
+     */
     function getTokensClaim(
         address _of,
         uint _claimId
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint tokens
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint tokens
+    )
     {
         return (_claimId, allvotes[userClaimVoteCA[_of][_claimId]].tokens);
     }
@@ -970,20 +970,20 @@ contract ClaimsData is Iupgradable {
      * @param _voter address of the voter.
      * @return lastCAvoteIndex last index till which reward was distributed for CA
      * @return lastMVvoteIndex last index till which reward was distributed for member
-     */ 
+     */
     function getRewardDistributedIndex(
         address _voter
-    ) 
-        external
-        view
-        returns(
-            uint lastCAvoteIndex,
-            uint lastMVvoteIndex
-        )
+    )
+    external
+    view
+    returns(
+        uint lastCAvoteIndex,
+        uint lastMVvoteIndex
+    )
     {
         return (
-            voterVoteRewardReceived[_voter].lastCAvoteIndex,
-            voterVoteRewardReceived[_voter].lastMVvoteIndex
+        voterVoteRewardReceived[_voter].lastCAvoteIndex,
+        voterVoteRewardReceived[_voter].lastMVvoteIndex
         );
     }
 
@@ -991,29 +991,29 @@ contract ClaimsData is Iupgradable {
      * @param claimid claim id.
      * @return perc_CA reward Percentage for claim assessor
      * @return perc_MV reward Percentage for members
-     * @return tokens total tokens to be rewarded 
-     */ 
+     * @return tokens total tokens to be rewarded
+     */
     function getClaimRewardDetail(
         uint claimid
-    ) 
-        external
-        view
-        returns(
-            uint percCA,
-            uint percMV,
-            uint tokens
-        )
+    )
+    external
+    view
+    returns(
+        uint percCA,
+        uint percMV,
+        uint tokens
+    )
     {
         return (
-            claimRewardDetail[claimid].percCA,
-            claimRewardDetail[claimid].percMV,
-            claimRewardDetail[claimid].tokenToBeDist
+        claimRewardDetail[claimid].percCA,
+        claimRewardDetail[claimid].percMV,
+        claimRewardDetail[claimid].tokenToBeDist
         );
     }
 
     /**
      * @dev Gets cover id of a claim.
-     */ 
+     */
     function getClaimCoverId(uint _claimId) external view returns(uint claimId, uint coverid) {
         return (_claimId, allClaims[_claimId].coverId);
     }
@@ -1023,7 +1023,7 @@ contract ClaimsData is Iupgradable {
      * @param _claimId Claim Id.
      * @param _verdict 1 to get total number of accept tokens, -1 to get total number of deny tokens.
      * @return token token Number of tokens(either accept or deny on the basis of verdict given as parameter).
-     */ 
+     */
     function getClaimVote(uint _claimId, int8 _verdict) external view returns(uint claimId, uint token) {
         claimId = _claimId;
         token = 0;
@@ -1038,9 +1038,9 @@ contract ClaimsData is Iupgradable {
      * @param _claimId Claim Id.
      * @param _verdict 1 to get total number of accept tokens,
      *  -1 to get total number of deny tokens.
-     * @return token token Number of tokens(either accept or 
+     * @return token token Number of tokens(either accept or
      * deny on the basis of verdict given as parameter).
-     */ 
+     */
     function getClaimMVote(uint _claimId, int8 _verdict) external view returns(uint claimId, uint token) {
         claimId = _claimId;
         token = 0;
@@ -1053,7 +1053,7 @@ contract ClaimsData is Iupgradable {
     /**
      * @param _voter address  of voteid
      * @param index index to get voteid in CA
-     */ 
+     */
     function getVoteAddressCA(address _voter, uint index) external view returns(uint) {
         return voteAddressCA[_voter][index];
     }
@@ -1061,21 +1061,21 @@ contract ClaimsData is Iupgradable {
     /**
      * @param _voter address  of voter
      * @param index index to get voteid in member vote
-     */ 
+     */
     function getVoteAddressMember(address _voter, uint index) external view returns(uint) {
         return voteAddressMember[_voter][index];
     }
 
     /**
-     * @param _voter address  of voter   
-     */ 
+     * @param _voter address  of voter
+     */
     function getVoteAddressCALength(address _voter) external view returns(uint) {
         return voteAddressCA[_voter].length;
     }
 
     /**
-     * @param _voter address  of voter   
-     */ 
+     * @param _voter address  of voter
+     */
     function getVoteAddressMemberLength(address _voter) external view returns(uint) {
         return voteAddressMember[_voter].length;
     }
@@ -1084,55 +1084,55 @@ contract ClaimsData is Iupgradable {
      * @dev Gets the Final result of voting of a claim.
      * @param _claimId Claim id.
      * @return verdict 1 if claim is accepted, -1 if declined.
-     */ 
+     */
     function getFinalVerdict(uint _claimId) external view returns(int8 verdict) {
         return claimVote[_claimId];
     }
 
     /**
      * @dev Get number of Claims queued for submission during emergency pause.
-     */ 
+     */
     function getLengthOfClaimSubmittedAtEP() external view returns(uint len) {
         len = claimPause.length;
     }
 
     /**
-     * @dev Gets the index from which claim needs to be 
+     * @dev Gets the index from which claim needs to be
      * submitted when emergency pause is swithched off.
-     */ 
+     */
     function getFirstClaimIndexToSubmitAfterEP() external view returns(uint indexToSubmit) {
         indexToSubmit = claimPauseLastsubmit;
     }
-    
+
     /**
      * @dev Gets number of Claims to be reopened for voting post emergency pause period.
-     */ 
+     */
     function getLengthOfClaimVotingPause() external view returns(uint len) {
         len = claimPauseVotingEP.length;
     }
 
     /**
      * @dev Gets claim details to be reopened for voting after emergency pause.
-     */ 
+     */
     function getPendingClaimDetailsByIndex(
         uint _index
     )
-        external
-        view
-        returns(
-            uint claimId,
-            uint pendingTime,
-            bool voting
-        )
+    external
+    view
+    returns(
+        uint claimId,
+        uint pendingTime,
+        bool voting
+    )
     {
         claimId = claimPauseVotingEP[_index].claimid;
         pendingTime = claimPauseVotingEP[_index].pendingTime;
         voting = claimPauseVotingEP[_index].voting;
     }
 
-    /** 
+    /**
      * @dev Gets the index from which claim needs to be reopened when emergency pause is swithched off.
-     */ 
+     */
     function getFirstClaimIndexToStartVotingAfterEP() external view returns(uint firstindex) {
         firstindex = claimStartVotingFirstIndex;
     }
@@ -1181,7 +1181,7 @@ contract ClaimsData is Iupgradable {
 
             revert("Invalid param code");
         }
-    
+
     }
 
     /**
@@ -1215,63 +1215,63 @@ contract ClaimsData is Iupgradable {
         _pushStatus(0, 0); //10 Final-Claim Assessor Vote Accept, MV Nodecision
         _pushStatus(0, 0); //11 Final-Claim Assessor Vote Denied, MV Nodecision
         _pushStatus(0, 0); //12 Claim Accepted Payout Pending
-        _pushStatus(0, 0); //13 Claim Accepted No Payout 
+        _pushStatus(0, 0); //13 Claim Accepted No Payout
         _pushStatus(0, 0); //14 Claim Accepted Payout Done
     }
 
     /**
      * @dev Sets Maximum time(in seconds) for which claim assessment voting is open
-     */ 
+     */
     function _setMaxVotingTime(uint _time) internal {
         maxVotingTime = _time;
     }
 
     /**
      *  @dev Sets Minimum time(in seconds) for which claim assessment voting is open
-     */ 
+     */
     function _setMinVotingTime(uint _time) internal {
         minVotingTime = _time;
     }
 
     /**
      *  @dev Sets Minimum vote threshold required
-     */ 
+     */
     function _setMinVoteThreshold(uint val) internal {
         minVoteThreshold = val;
     }
 
     /**
      *  @dev Sets Maximum vote threshold required
-     */ 
+     */
     function _setMaxVoteThreshold(uint val) internal {
         maxVoteThreshold = val;
     }
-    
+
     /**
      *  @dev Sets the value considered as Majority Consenus in voting
-     */ 
+     */
     function _setMajorityConsensus(uint val) internal {
         majorityConsensus = val;
     }
 
     /**
      * @dev Sets the payout retry time
-     */ 
+     */
     function _setPayoutRetryTime(uint _time) internal {
         payoutRetryTime = _time;
     }
 
     /**
      *  @dev Sets percentage of reward given for claim assessment
-     */ 
+     */
     function _setClaimRewardPerc(uint _val) internal {
 
         claimRewardPerc = _val;
     }
-  
-    /** 
+
+    /**
      * @dev Sets the time for which claim is deposited.
-     */ 
+     */
     function _setClaimDepositTime(uint _time) internal {
 
         claimDepositTime = _time;
@@ -1279,7 +1279,7 @@ contract ClaimsData is Iupgradable {
 
     /**
      *  @dev Sets number of days claim assessment will be paused
-     */ 
+     */
     function _setPauseDaysCA(uint val) internal {
         pauseDaysCA = val;
     }

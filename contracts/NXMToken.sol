@@ -15,8 +15,8 @@
 
 pragma solidity 0.5.7;
 
-import "./external/openzeppelin-solidity/token/ERC20/IERC20.sol";
-import "./external/openzeppelin-solidity/math/SafeMath.sol";
+import "./IERC20.sol";
+import "./SafeMath.sol";
 
 
 contract NXMToken is IERC20 {
@@ -82,9 +82,9 @@ contract NXMToken is IERC20 {
         address owner,
         address spender
     )
-        public
-        view
-        returns (uint256)
+    public
+    view
+    returns (uint256)
     {
         return _allowed[owner][spender];
     }
@@ -119,8 +119,8 @@ contract NXMToken is IERC20 {
         address spender,
         uint256 addedValue
     )
-        public
-        returns (bool)
+    public
+    returns (bool)
     {
         require(spender != address(0));
 
@@ -143,8 +143,8 @@ contract NXMToken is IERC20 {
         address spender,
         uint256 subtractedValue
     )
-        public
-        returns (bool)
+    public
+    returns (bool)
     {
         require(spender != address(0));
 
@@ -222,7 +222,7 @@ contract NXMToken is IERC20 {
 
         require(isLockedForMV[msg.sender] < now); // if not voted under governance
         require(value <= _balances[msg.sender]);
-        _transfer(to, value); 
+        _transfer(to, value);
         return true;
     }
 
@@ -248,9 +248,9 @@ contract NXMToken is IERC20 {
         address to,
         uint256 value
     )
-        public
-        canTransfer(to)
-        returns (bool)
+    public
+    canTransfer(to)
+    returns (bool)
     {
         require(isLockedForMV[from] < now); // if not voted under governance
         require(value <= _balances[from]);
@@ -290,7 +290,7 @@ contract NXMToken is IERC20 {
         address to,
         uint256 value
     )
-        internal
+    internal
     {
         _balances[from] = _balances[from].sub(value);
         _balances[to] = _balances[to].add(value);
@@ -339,7 +339,7 @@ contract NXMToken is IERC20 {
         // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
         // this function needs to emit an event with the updated approval.
         _allowed[account][msg.sender] = _allowed[account][msg.sender].sub(
-        value);
+            value);
         _burn(account, value);
     }
 }

@@ -16,7 +16,7 @@
 pragma solidity 0.5.7;
 
 import "./PoolData.sol";
-import "./external/oraclize/ethereum-api/usingOraclize.sol";
+import "./usingOraclize.sol";
 import "./Claims.sol";
 import "./Quotation.sol";
 import "./Pool2.sol";
@@ -56,8 +56,8 @@ contract Pool1 is usingOraclize, Iupgradable {
      * @dev Pays out the sum assured in case a claim is accepted
      * @param coverid Cover Id.
      * @param claimid Claim Id.
-     * @return succ true if payout is successful, false otherwise. 
-     */ 
+     * @return succ true if payout is successful, false otherwise.
+     */
     function sendClaimPayout(
         uint coverid,
         uint claimid,
@@ -65,12 +65,12 @@ contract Pool1 is usingOraclize, Iupgradable {
         address payable coverHolder,
         bytes4 coverCurr
     )
-        external
-        onlyInternal
-        noReentrancy
-        returns(bool succ)
+    external
+    onlyInternal
+    noReentrancy
+    returns(bool succ)
     {
-        
+
         uint sa = sumAssured.div(DECIMAL1E18);
         bool check;
         IERC20 erc20 = IERC20(pd.getCurrencyAssetAddress(coverCurr));
@@ -84,10 +84,10 @@ contract Pool1 is usingOraclize, Iupgradable {
             erc20.transfer(coverHolder, sumAssured);
             check = true;
         }
-        
+
         if (check == true) {
             q2.removeSAFromCSA(coverid, sa);
-            pd.changeCurrencyAssetVarMin(coverCurr, 
+            pd.changeCurrencyAssetVarMin(coverCurr,
                 pd.getCurrencyAssetVarMin(coverCurr).sub(sumAssured));
             emit Payout(coverHolder, coverid, sumAssured);
             succ = true;
@@ -126,7 +126,7 @@ contract Pool1 is usingOraclize, Iupgradable {
     /// @param time Time (in seconds) after which the cover should be expired
     function closeCoverOraclise(uint id, uint64 time) external onlyInternal {
         bytes32 myid = _oraclizeQuery(4, time, "URL", strConcat(
-            "http://a1.nexusmutual.io/api/Claims/closeClaim_hash/", uint2str(id)), 1000000);
+                "http://a1.nexusmutual.io/api/Claims/closeClaim_hash/", uint2str(id)), 1000000);
         _saveApiDetails(myid, "COV", id);
     }
 
@@ -149,7 +149,7 @@ contract Pool1 is usingOraclize, Iupgradable {
         bytes32 myid = _oraclizeQuery(3, time, "URL", "https://api.nexusmutual.io/saveIADetails/M1", 0);
         _saveApiDetails(myid, "IARB", 0);
     }
-    
+
     /**
      * @dev Transfers all assest (i.e ETH balance, Currency Assest) from old Pool to new Pool
      * @param newPoolAddress Address of the new Pool
@@ -181,7 +181,7 @@ contract Pool1 is usingOraclize, Iupgradable {
     }
 
     function sendEther() public payable {
-        
+
     }
 
     /**
@@ -194,14 +194,14 @@ contract Pool1 is usingOraclize, Iupgradable {
         bytes4 curr,
         uint amount
     )
-        public
-        onlyInternal
-        noReentrancy
-        returns(bool)
+    public
+    onlyInternal
+    noReentrancy
+    returns(bool)
     {
-    
+
         return _transferCurrencyAsset(curr, amount);
-    } 
+    }
 
     /// @dev Handles callback of external oracle query.
     function __callback(bytes32 myid, string memory result) public {
@@ -221,10 +221,10 @@ contract Pool1 is usingOraclize, Iupgradable {
         bytes32 _r,
         bytes32 _s
     )
-        public
-        isMember
-        checkPause
-        payable
+    public
+    isMember
+    checkPause
+    payable
     {
         require(msg.value == coverDetails[1]);
         q2.verifyCoverDetails(msg.sender, smartCAdd, coverCurr, coverDetails, coverPeriod, _v, _r, _s);
@@ -232,7 +232,7 @@ contract Pool1 is usingOraclize, Iupgradable {
 
     /**
      * @dev Enables user to purchase cover via currency asset eg DAI
-     */ 
+     */
     function makeCoverUsingCA(
         address smartCAdd,
         bytes4 coverCurr,
@@ -241,10 +241,10 @@ contract Pool1 is usingOraclize, Iupgradable {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) 
-        public
-        isMember
-        checkPause
+    )
+    public
+    isMember
+    checkPause
     {
         IERC20 erc20 = IERC20(pd.getCurrencyAssetAddress(coverCurr));
         require(erc20.transferFrom(msg.sender, address(this), coverDetails[1]), "Transfer failed");
@@ -314,7 +314,7 @@ contract Pool1 is usingOraclize, Iupgradable {
 
     /**
      * @dev Returns the amount of token a buyer will get for corresponding wei
-     * @param weiPaid Amount of wei 
+     * @param weiPaid Amount of wei
      * @return tokenToGet Amount of tokens the buyer will get
      */
     function getToken(uint weiPaid) public view returns(uint tokenToGet) {
@@ -378,7 +378,7 @@ contract Pool1 is usingOraclize, Iupgradable {
         uint superWeiSpent;
         uint tokenSupply = tk.totalSupply();
         uint vtp;
-        uint mcrFullperc;   
+        uint mcrFullperc;
         uint vFull;
         uint mcrtp;
         (mcrFullperc, , vFull, ) = pd.getLastMCR();
@@ -387,7 +387,7 @@ contract Pool1 is usingOraclize, Iupgradable {
         require(m1.calculateTokenPrice("ETH") > 0, "Token price can not be zero");
         while (superWeiLeft > 0) {
             mcrtp = (mcrFullperc.mul(vtp)).div(vFull);
-            tokenPrice = m1.calculateStepTokenPrice("ETH", mcrtp);            
+            tokenPrice = m1.calculateStepTokenPrice("ETH", mcrtp);
             tempTokens = superWeiLeft.div(tokenPrice);
             if (tempTokens <= td.priceStep().mul(DECIMAL1E18)) {
                 tokenToGet = tokenToGet.add(tempTokens);
@@ -402,12 +402,12 @@ contract Pool1 is usingOraclize, Iupgradable {
         }
     }
 
-    /** 
+    /**
      * @dev Save the details of the Oraclize API.
      * @param myid Id return by the oraclize query.
      * @param _typeof type of the query for which oraclize call is made.
      * @param id ID of the proposal, quote, cover etc. for which oraclize call is made.
-     */ 
+     */
     function _saveApiDetails(bytes32 myid, bytes4 _typeof, uint id) internal {
         pd.saveApiDetails(myid, _typeof, id);
         pd.addInAllApiCall(myid);
@@ -427,22 +427,22 @@ contract Pool1 is usingOraclize, Iupgradable {
             succ = true;
         } else {
             IERC20 erc20 = IERC20(pd.getCurrencyAssetAddress(_curr)); //solhint-disable-line
-            if (erc20.balanceOf(address(this)) < _amount) 
+            if (erc20.balanceOf(address(this)) < _amount)
                 _amount = erc20.balanceOf(address(this));
-            require(erc20.transfer(address(p2), _amount)); 
+            require(erc20.transfer(address(p2), _amount));
             succ = true;
-            
-        }
-    } 
 
-    /** 
+        }
+    }
+
+    /**
      * @dev Transfers ERC20 Currency asset from this Pool to another Pool on upgrade.
-     */ 
+     */
     function _upgradeCapitalPool(
         bytes4 _curr,
         address _newPoolAddress
-    ) 
-        internal
+    )
+    internal
     {
         IERC20 erc20 = IERC20(pd.getCurrencyAssetAddress(_curr));
         if (erc20.balanceOf(address(this)) > 0)
@@ -464,14 +464,14 @@ contract Pool1 is usingOraclize, Iupgradable {
         string memory datasource,
         string memory arg,
         uint gasLimit
-    ) 
-        internal
-        returns (bytes32 id)
+    )
+    internal
+    returns (bytes32 id)
     {
         if (paramCount == 4) {
-            id = oraclize_query(timestamp, datasource, arg, gasLimit);   
+            id = oraclize_query(timestamp, datasource, arg, gasLimit);
         } else if (paramCount == 3) {
-            id = oraclize_query(timestamp, datasource, arg);   
+            id = oraclize_query(timestamp, datasource, arg);
         } else {
             id = oraclize_query(datasource, arg);
         }
